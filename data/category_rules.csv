@@ -1,0 +1,57 @@
+pattern,category
+WOOLWORTHS,Groceries
+COLES,Groceries
+IGA,Groceries
+ALDI,Groceries
+BUNNINGS,Hardware
+KMART,Retail
+TARGET,Retail
+BIG W,Retail
+OFFICEWORKS,Office Supplies
+JB HI-FI,Electronics
+HARVEY NORMAN,Electronics
+CHEMIST,Health & Pharmacy
+PHARMACY,Health & Pharmacy
+MEDICAL,Health & Pharmacy
+DOCTOR,Health & Pharmacy
+FUEL,Transport
+PETROL,Transport
+BP,Transport
+CALTEX,Transport
+SHELL,Transport
+UBER,Transport
+TAXI,Transport
+RESTAURANT,Dining Out
+CAFE,Dining Out
+MCDONALD,Dining Out
+KFC,Dining Out
+HUNGRY JACK,Dining Out
+PIZZA,Dining Out
+SUBWAY,Dining Out
+GYM,Fitness
+FITNESS,Fitness
+NETFLIX,Entertainment
+SPOTIFY,Entertainment
+STAN,Entertainment
+BINGE,Entertainment
+ELECTRICITY,Utilities
+WATER,Utilities
+GAS,Utilities
+INTERNET,Utilities
+TELSTRA,Utilities
+OPTUS,Utilities
+VODAFONE,Utilities
+IINET,Utilities
+RENT,Housing
+MORTGAGE,Housing
+INSURANCE,Insurance
+HBF,Insurance
+BUPA,Insurance
+MEDIBANK,Insurance
+AMAZON,Online Shopping
+EBAY,Online Shopping
+ALIEXPRESS,Online Shopping
+PAYPAL,Online Shopping
+ATM,Cash Withdrawal
+WITHDRAW,Cash Withdrawal
+TRANSFER,Transfer
