@@ -24,6 +24,9 @@ UBER,Transport
 TAXI,Transport
 EASYPARK,Transport
 PARKING,Transport
+REDDY,Transport
+AMPOL,Transport
+OTR COMO,Transport
 RESTAURANT,Dining Out
 CAFE,Dining Out
 MCDONALD,Dining Out
@@ -39,13 +42,21 @@ DUMPLING HUT,Dining Out
 PRESOTEA,Dining Out
 KEBAB,Dining Out
 COFFEE,Dining Out
+PHO,Dining Out
+MONSTERA THAI,Dining Out
+VARSITY NORTHBRIDGE,Dining Out
+GUZMAN Y GOMEZ,Dining Out
+HANOZE PARK PTY LTD,Dining Out
+SUBI FISH N CHIPS,Dining Out
 GYM,Fitness
 FITNESS,Fitness
 NETFLIX,Entertainment
 SPOTIFY,Entertainment
 STAN,Entertainment
 BINGE,Entertainment
-APPLE.COM/BILL,Entertainment
+STEAM PURCHASE,Entertainment
+BLIZZARD ENTERTAINMENT,Entertainment
+READING CINEMAS,Entertainment
 ELECTRICITY,Utilities
 WATER,Utilities
 GAS,Utilities
@@ -54,6 +65,7 @@ TELSTRA,Utilities
 OPTUS,Utilities
 VODAFONE,Utilities
 IINET,Utilities
+APPLE.COM/BILL,Utilities
 RENT,Housing
 MORTGAGE,Housing
 INSURANCE,Insurance
