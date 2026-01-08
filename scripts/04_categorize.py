@@ -88,6 +88,20 @@ def categorize_transactions():
             total_amount = transactions_df[transactions_df['category'] == category]['amount'].sum()
             print(f"{category:<25} {count:>5} transactions  ${total_amount:>12,.2f}")
 
+        # Income/Expense totals (excluding transfers)
+        print("\n" + "-"*60)
+        print("INCOME & EXPENSE TOTALS (excluding Transfers)")
+        print("-"*60)
+
+        non_transfer = transactions_df[transactions_df['category'] != 'Transfer']
+        real_income = non_transfer[non_transfer['transaction_type'] == 'income']['amount'].sum()
+        real_expense = non_transfer[non_transfer['transaction_type'] == 'expense']['amount'].sum()
+        real_net = non_transfer['amount'].sum()
+
+        print(f"Real Income:  ${real_income:>12,.2f}")
+        print(f"Real Expense: ${real_expense:>12,.2f}")
+        print(f"Net Total:    ${real_net:>12,.2f}")
+
         # Top 10 uncategorized merchants
         print("\n" + "-"*60)
         print("TOP 10 UNCATEGORIZED MERCHANTS")
