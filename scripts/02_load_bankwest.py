@@ -49,15 +49,15 @@ def load_and_process_bankwest():
         )
 
         # Create amount column by combining Debit and Credit
-        # Debit = money out (negative), Credit = money in (positive)
+        # Debit values are already negative in the CSV, Credit values are positive
         bankwest_df["amount"] = 0.0
 
-        # Handle Debit column (expenses)
+        # Handle Debit column (expenses) - already negative, so just copy
         bankwest_df.loc[bankwest_df["Debit"].notna(), "amount"] = (
-            -bankwest_df.loc[bankwest_df["Debit"].notna(), "Debit"]
+            bankwest_df.loc[bankwest_df["Debit"].notna(), "Debit"]
         )
 
-        # Handle Credit column (income)
+        # Handle Credit column (income) - already positive, so just copy
         bankwest_df.loc[bankwest_df["Credit"].notna(), "amount"] = (
             bankwest_df.loc[bankwest_df["Credit"].notna(), "Credit"]
         )
