@@ -4,8 +4,8 @@ Loads raw ANZ CSV data, cleans it, and saves to processed folder
 """
 
 import pandas as pd
-import os
 from pathlib import Path
+import glob
 
 def load_and_process_anz():
     """
@@ -13,22 +13,38 @@ def load_and_process_anz():
     """
     try:
         # Define file paths
-        input_file = Path("data/raw/anz/ANZ.csv")
+        input_pattern = "data/raw/anz/*.csv"
         output_file = Path("data/processed/anz_clean.csv")
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        print(f"Loading data from {input_file}...")
+        # Find all ANZ CSV files
+        anz_files = glob.glob(input_pattern)
 
-        # Load ANZ CSV (no header, 3 columns: date, amount, description)
-        anz_df = pd.read_csv(
-            input_file,
-            header=None,
-            names=["date", "amount", "description"]
-        )
+        if not anz_files:
+            print(f"Error: No CSV files found matching pattern '{input_pattern}'")
+            return None
 
-        print(f"Loaded {len(anz_df)} rows")
+        print(f"Found {len(anz_files)} ANZ file(s):")
+        for file in anz_files:
+            print(f"  - {file}")
+
+        # Load all ANZ CSV files
+        all_data = []
+        for file in anz_files:
+            print(f"\nLoading data from {file}...")
+            df = pd.read_csv(
+                file,
+                header=None,
+                names=["date", "amount", "description"]
+            )
+            all_data.append(df)
+            print(f"  Loaded {len(df)} rows")
+
+        # Combine all data
+        anz_df = pd.concat(all_data, ignore_index=True)
+        print(f"\nTotal rows loaded: {len(anz_df)}")
 
         # Parse dates from DD/MM/YYYY format to datetime
         anz_df["date"] = pd.to_datetime(anz_df["date"], format="%d/%m/%Y")
@@ -49,6 +65,17 @@ def load_and_process_anz():
 
         # Reorder columns
         anz_df = anz_df[["date", "amount", "description", "transaction_type", "source"]]
+
+        # Remove duplicates (in case same transaction appears in multiple files)
+        original_count = len(anz_df)
+        anz_df = anz_df.drop_duplicates(
+            subset=["date", "amount", "description"],
+            keep="first"
+        )
+        duplicates_removed = original_count - len(anz_df)
+
+        if duplicates_removed > 0:
+            print(f"\nRemoved {duplicates_removed} duplicate transactions")
 
         # Save to processed folder
         anz_df.to_csv(output_file, index=False)
@@ -91,8 +118,8 @@ def load_and_process_anz():
         return anz_df
 
     except FileNotFoundError:
-        print(f"Error: Input file '{input_file}' not found.")
-        print("Please ensure the file exists in the correct location.")
+        print(f"Error: Input files not found.")
+        print("Please ensure ANZ CSV files exist in data/raw/anz/")
         return None
 
     except pd.errors.ParserError as e:
