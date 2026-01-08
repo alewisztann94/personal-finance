@@ -15,6 +15,8 @@ CHEMIST,Health & Pharmacy
 PHARMACY,Health & Pharmacy
 MEDICAL,Health & Pharmacy
 DOCTOR,Health & Pharmacy
+IB TRANSFER,Transfer
+IB BPAY,Transfer
 FUEL,Transport
 PETROL,Transport
 BP,Transport
@@ -78,6 +80,4 @@ ALIEXPRESS,Online Shopping
 PAYPAL,Online Shopping
 ATM,Cash Withdrawal
 WITHDRAW,Cash Withdrawal
-IB TRANSFER,Transfer
-IB BPAY,Transfer
 TRANSFER,Transfer
