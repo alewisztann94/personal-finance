@@ -41,23 +41,22 @@ def categorize_transactions():
         print("\nCategorizing transactions...")
 
         for idx, row in transactions_df.iterrows():
-            # Income transactions get 'Income' category
-            if row['transaction_type'] == 'income':
-                transactions_df.at[idx, 'category'] = 'Income'
-            else:
-                # Check description against patterns (case insensitive)
-                description_upper = str(row['description']).upper()
-                matched = False
+            # Check description against patterns (case insensitive)
+            description_upper = str(row['description']).upper()
+            matched = False
 
-                for _, rule in rules_df.iterrows():
-                    pattern = str(rule['pattern']).upper()
-                    if pattern in description_upper:
-                        transactions_df.at[idx, 'category'] = rule['category']
-                        matched = True
-                        break  # First match wins
+            for _, rule in rules_df.iterrows():
+                pattern = str(rule['pattern']).upper()
+                if pattern in description_upper:
+                    transactions_df.at[idx, 'category'] = rule['category']
+                    matched = True
+                    break  # First match wins
 
-                # If no match, mark as Uncategorized
-                if not matched:
+            # If no pattern matched, use default categories
+            if not matched:
+                if row['transaction_type'] == 'income':
+                    transactions_df.at[idx, 'category'] = 'Income'
+                else:
                     transactions_df.at[idx, 'category'] = 'Uncategorized'
 
         # Save categorized data
