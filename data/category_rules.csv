@@ -3,6 +3,7 @@ WOOLWORTHS,Groceries
 COLES,Groceries
 IGA,Groceries
 ALDI,Groceries
+FARMER JACKS,Groceries
 BUNNINGS,Hardware
 KMART,Retail
 TARGET,Retail
@@ -21,6 +22,8 @@ CALTEX,Transport
 SHELL,Transport
 UBER,Transport
 TAXI,Transport
+EASYPARK,Transport
+PARKING,Transport
 RESTAURANT,Dining Out
 CAFE,Dining Out
 MCDONALD,Dining Out
@@ -28,12 +31,21 @@ KFC,Dining Out
 HUNGRY JACK,Dining Out
 PIZZA,Dining Out
 SUBWAY,Dining Out
+GIANT COFFEE,Dining Out
+CHARLIE BOY COFFEE,Dining Out
+SIPRA KEBAB,Dining Out
+AYAM PENYET,Dining Out
+DUMPLING HUT,Dining Out
+PRESOTEA,Dining Out
+KEBAB,Dining Out
+COFFEE,Dining Out
 GYM,Fitness
 FITNESS,Fitness
 NETFLIX,Entertainment
 SPOTIFY,Entertainment
 STAN,Entertainment
 BINGE,Entertainment
+APPLE.COM/BILL,Entertainment
 ELECTRICITY,Utilities
 WATER,Utilities
 GAS,Utilities
