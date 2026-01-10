@@ -1,0 +1,17 @@
+{
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  },
+  "editor.quickSuggestionsDelay": 0,
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.parameterHints.enabled": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.wordBasedSuggestions": "off",
+  "emmet.triggerExpansionOnTab": false,
+  "github.copilot.enable": false,
+  "github.copilot.inlineSuggest.enable": false,
+  "tabnine.experimental.autoimports": false
+}
