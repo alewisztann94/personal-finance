@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd transaction categorization script and rules\n\nImplements category matching system for ANZ transactions:\n- Loads cleaned transaction data\n- Applies pattern-based category rules \\(first match wins\\)\n- Auto-categorizes income transactions\n- Marks unmatched as ''Uncategorized''\n- Includes comprehensive summary statistics\n- Shows top 10 uncategorized merchants for rule refinement\n\nIncludes initial category rules covering common merchants and services.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(git mv:*)",
+      "Bash(git reset:*)",
+      "Bash(echo:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(python scripts/04_categorize.py:*)",
+      "Bash(git rm:*)"
+    ]
+  }
+}

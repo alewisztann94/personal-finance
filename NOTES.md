@@ -1,0 +1,142 @@
+My writing:
+After letting Claude essentially write and orchestrate the entire first project (perth-real_estate), I decided to try a more educational approach without leveraging Claude writing everything for me.
+
+Personal finance budgeting is relatively straightforward - we chuck all our downloaded data into a dataframe and then have to categorise them all, however that requires alot of parsing through strings. 
+
+Claude recommended transformations in Python, but knowing that I have to learn ELT and dbt for a more modern approach to the analytics stack, I figured this might be a good chance for me to try categorisation using dbt as opposed to throwing a whole bunch of mapped strings into a python dictionary and looping transaction descriptions through it. 
+
+Well. Claude told me to do both so I'll do the Python approach and then I'll refactor this as a dbt project. 
+
+Update 30 minutes later: I got bored slogging through syntax/manual categorization and had a change of heart.
+
+"
+originally i had an existential crisis and started talking to claude and telling it to not suggest me code and for me to write everything by scratch. I got through the data load googling ancient reddit posts, disabling VS code autocomplete (with the use of AI), and then once I was manually categorizing manual transactions I realized something: I absolutely do not want to do this, and I am going to leverage AI, and as long as I can catch things that are wrong and have a read of the code and ask it the right things, I am going to continue leveraging it to build. I don’t have to be a 10x AI engineer who knows absolutely everything about programming, I am an analytics engineer and I’m going to spend my time learning architectural things and figuring out how to use AI effectively and through practical use, figure out it’s potential flaws and downsides. 
+
+In the past I would get bogged down in the syntax, why would I do that now when I can get AI to do it for me? 
+
+we will see if this goes disastrously for me but for now I’m throwing caution to the wind I think. 
+"
+—09/01/26 → i decided to lean in to the power of claude code, a few interesting things to note:
+
+architectural decision: do we load anz/bankwest data individually then categorise per bank? or do we load both datasets, combine them, then run the categorisation on the combined set.
+
+advantages of individual are: we can isolate transactions at a bank level.
+
+what's the point of this project though, we want an overview of what our overall expenses and income is, and how we are spending. in that case it's better to combine, we don't need granularity at the individual bank level.
+
+I also noticed that we weren't appropriately categorizing some transfers as my real income was far too high. I wish it was that high but I knew something was up.
+
+By simply mentioning to Claude Code that my annual salary is x and that the figures are off based on the date range, the LLM was able to notice that we are mapping 'IBP Payments' to 'BP' (transport) instead of transfers.
+
+Scope for improvement in the future:
+1. Better prompting
+2. Make usage of hooks and context management
+
+09-01-26 
+
+Decided to code review and then assess what claude had to say about my relative understanding / questions about decisions.
+-- are answers from claude code 
+
+script 1: 
+
+input pattern is a string, we use glob to search through directory to find all anz csv files.
+
+if we don't find any print an error and exit the script by returning None.
+
+print name of all csv files found by glob. 
+
+parse through the csv files and turn each one into a df. store the dataframes in an array, and print the row length of each dataframe.
+
+Interesting - we are working with the assumption that all anz csv files contain the same column structure.
+
+combine the dataframes using pd.concat
+
+we convert dates to datetime, I believe the reason is because datetime format allows time series analysis.
+
+convert amounts to floats to avoid weird rounding and well... money is to two decimal points.
+
+we normalise the descriptions by getting rid of whitespaces. i'm not 100% sure if it removes leading and trailing. strings are all converted to uppercase.
+-- removes leading + trailing. leaves middle whitespace.
+
+we add a new column transaction type that uses the amount to determine if it's income or an expense. i'm not confident with this syntax but logically looks fine. income if amount is above zero else it's negative and an expense.
+
+we have a remove duplicates script that i'm unsure of the need. actually we don't want to double up on transactions so fair enough. we might have overlapping input csvs. i'm okay with this.
+
+we then have a bunch of aggregates and summary statistics to validate what we've processed. 
+
+the end is a series of smart error handling in case of a corrupted file path, or csv file, or just anything else i guess. what results in an Exception exactly? I recall seeing it in error handling quite often. '
+-- exception is a catch all for errors (network issues, permission errors, memory errors, etc. safety net)
+
+
+script 2:
+
+similar to script 1. originally script 1 did not have the ability to process multiple files, but bankwest load script had this functionality. prompted claude to add functionality to script 1 which was done.
+
+loading steps are identical with the exception of read csv which doesn't specifically name headers. this is because the bankwest csv has a header row.
+am assuming default parameters for read_csv will automatically include the first row as a header which is why claude left it.
+probably more robust to have first row as headers so it is robust to changes to column structure changes. depends on data source of course.
+
+I recall claude had to parse through a few times to recognise that debits were already negative. being specific in prompting how to treat data values would improve performance and save time. 
+
+perhaps thinking or planning mode could help here? 
+-- yes it would
+how would we include hooks into this project?
+-- .claude/hooks.json -> used to run linters (parses through file without running to look for dodgy syntax, tests/validations pre/post tool usage. gone through this in the claude code in action course)
+
+handling credit and debit column looks syntactically heavy but we essentially just collapse the debit and credit columns into the amount column. 
+
+we are combining the datasets (anz + bankwest) hence why we have to do it. 
+
+normalizing description column by stripping whitespaces from narration column and converting to uppercase. same as script 1.
+
+after this the process is pretty much the same as script 1. columns are all converted to the same name as the anz data. 
+
+script 3: combining datasets. 
+define paths to cleaned files and output file
+
+loading data seems fine -> I am unsure about the else clause for loading the data. why are we declaring 
+anz_df = pd.DataFrame(columns=["date", "amount", "description", "transaction_type", "source"])
+when the file is not found? 
+same with the bankwest load. 
+-- this is done because concat wont work without two dataframes. therefore we declare an empty one so the concat works. 
+
+concatenating the dataframes seems fine. ignore index means that we don't add an id column I believe. 
+
+explain the reset_index on line 50 please. 
+-- we do this because sorting throws the indexes out of line. we renumber the indexes and drop the index column. 
+
+explain the #transaction counts by source section. in particular why do we use the <12 and >6. print(f"  {source:<12} {count:>6} transactions")
+        print(f"  {'Total':<12} {len(combined_df):>6} transactions") 
+
+-- these numbers in f strings are just used to format. 
+<12 = left-align in a 12-character-wide field
+>6 = right-align in a 6-character-wide field
+
+i also noticed that we return the df at the end and this behaviour is the same for scripts 1 and 2. may i ask if this is standard? do we need to return something because in the scripts we have already saved the csv. do we return the df to successfully exit a script? 
+
+-- Allows interactive use (you can capture it: df = load_and_process_anz())
+Enables chaining scripts together
+Useful for testing/debugging
+Doesn't hurt anything - the CSV is already saved
+
+
+Script 4:
+we load the combined dataframe of all transactions. i notice we are converting the date to datetime even though in our previous processing we have done that. when we save a csv is it saved in string format so we have to convert back to datetime everytime we load into a dataframe?
+-- ye it's stored as a string
+
+we load the rules which is a csv of name, category.
+
+we then parse through each row of the transaction df ensuring case insensitivity by converting descriptions to uppercase. 
+
+okay yeah so it's a nested loop. we match to the first match found which means we need to place the transfer categories at the top of the categories csv.
+
+explain line 48, the _, placeholder, what's it's role? what does it represent?
+-- _ means "I don't care about this value".
+for _, rule in rules_df.iterrows():
+iterrows() returns (index, row), but we don't need the index, so we use _ to ignore it.
+
+in terms of runtime complexity i noticed that we would run through every single pattern for transactions of type income. would we not reduce the computational load by only iterating through transactions of type expenses? we don't need to map income types because i only have salary. 
+
+-- whoops. forgot about how we had an issue earlier where we were assigning transfers as income. we need to parse through the income to label them correctly as transfers hence why we don't ignore the 'income' labelled transactions. 
+
+everything after this seems fine. we save the categorized csv with categories assigned then print summary stats.
