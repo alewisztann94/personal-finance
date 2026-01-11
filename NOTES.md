@@ -119,7 +119,6 @@ Enables chaining scripts together
 Useful for testing/debugging
 Doesn't hurt anything - the CSV is already saved
 
-
 Script 4:
 we load the combined dataframe of all transactions. i notice we are converting the date to datetime even though in our previous processing we have done that. when we save a csv is it saved in string format so we have to convert back to datetime everytime we load into a dataframe?
 -- ye it's stored as a string
@@ -140,3 +139,58 @@ in terms of runtime complexity i noticed that we would run through every single 
 -- whoops. forgot about how we had an issue earlier where we were assigning transfers as income. we need to parse through the income to label them correctly as transfers hence why we don't ignore the 'income' labelled transactions. 
 
 everything after this seems fine. we save the categorized csv with categories assigned then print summary stats.
+
+10/01/26 
+
+luckily i checked the synthetic data generation script -> kept my bsb and acc number in the generated data. 
+
+gotta be careful!
+
+pipeline script:
+
+haven't had much experience with this so worth going over with chat gpt.
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+__file__ is your current path. the .parent returns the path of your parent directory, str() turns it into a string because str.path needs a string. the 0 positions the path at index 0 in paths which prioritises it.
+
+we run the script from personal-finance/scripts/run_pipeline.py -> so the parent directory is /scripts
+
+import_module() loads the name of the python script 
+(why do we omit the .py?), because each script wraps the functionality in a... function ... we use getattr to pull the named function of each script which successfully does the loading and processing. they all return a df on success. they also return None on failure... which prints an error message. 
+
+alright well went on an interesting journey. every python script is also a module, modules are 'run' on import -variables are defined and logic stored but not run.  (import_module), but they don't run the processing logic which is why we grab the function and then execute it. 
+
+the if __name__ == "__main__" is there to avoid importing (computationally expensive potentially) unless the script is run from command line explicitly as opposed to an import. 
+
+what exactly does that mean? will ask chat gpt to provide an example. i'm guessing load script might be imported in another script? unsure. 
+
+-- chat gpt wisdom 
+You could write:
+
+# 01_load_anz.py
+process_anz()
+
+But then this happens:
+
+import_module("01_load_anz")  # BOOM — runs immediately
+Your pipeline needs:
+
+Step	Purpose
+import_module	Load code & definitions
+getattr	Select what to run
+func(data_dir)	Actually run it
+
+hink of a module like a toolbox.
+
+Importing it → opening the toolbox
+
+Functions → tools inside
+
+Calling a function → using a tool
+
+Opening the toolbox doesn’t drill the hole.
+--- 
+so pretty much, when you are writing executables always wrap them in a function definition. minimise expensive overheads at top level so when you import scripts you aren't running them automatically.
+
+allows for better testing and orchestration, can load modules then run specific scripts that are defined by functions at appropriate times. 
