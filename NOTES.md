@@ -234,3 +234,115 @@ what exactly does that mean? will ask chat gpt to provide an example. i'm guessi
 **Takeaway:** when you are writing executables always wrap them in a function definition. minimise expensive overheads at top level so when you import scripts you aren't running them automatically.
 
 allows for better testing and orchestration, can load modules then run specific scripts that are defined by functions at appropriate times.
+
+11/01/26
+
+We have cleaned combined categorized data. Let's consider what questions we want answered.
+
+What percentage of my monthly spend is on which category?
+in SQL this would be something like:
+
+get total monthly spend
+get total monthly spend grouped by category
+
+
+SEL month(date) as mnth, category, sum(amount) OVER (PARTITION BY month(date)) as ttl_mnth, sum(amount) OVER (PARTITION BY month(date), category) as ttl_mnth_ctgry,
+ttl_mnth_ctgry / ttl_mnth * 100 as pct_spnd
+FROM transactions; 
+
+would something like that work? 
+--conceptually right, but can't reference things in select which was a question i had. better to split into CTE (common table expression) aka with statement similar to:
+
+WITH monthly_spend AS (
+SEL month(date) as month
+, category 
+, sum(amount) as monthly_spend_category
+FROM transactions
+GROUP BY 1,2
+) ,
+monthly_totals AS (
+SEL month(date) as month
+, sum(amount) as monthly_total_spend
+FROM transactions
+GROUP BY 1
+)
+SEL m.month
+, m.category
+, m.monthly_spend_category
+, mt.monthly_total_spend
+, monthly_spend_category / monthly_total_spend * 100 as pct_spend
+FROM monthly_spend m
+LEFT JOIN monthly_totals mt
+ON m.month = mt.month
+
+How does my spending fluctuate from month to month?
+would we use a lag function? haven't really done this much.
+could of course just manually do it by looking at monthly_totals and perhaps calculating percentage changes from one month to the next.
+
+How much money am I saving on average a month as a percentage of my income?
+this would be something like category, month, sum(amount) as income group by 1,2 where category = 'Income' 
+then savings - expenses = ttl_savings /  income * 100
+
+other useful metrics to track suggested by claude
+top merchants and top categories of spending
+
+that's pretty straight forward, could filter by month. 
+would just be:
+sel month,category, RANK() OVER (partition by month, category ORDER BY amount)
+from monthly_spend
+
+you would want to use an intermediate staging table to get the monthly totals first
+
+script 5 load to db
+
+in script 5 explain why you created three indexes.
+is creating additional indexes necessary? we already have primary key id.
+i learnt that making multiple indexes are often unnecessary. 
+
+for the sample category breakdown, are we finding the total number of transactions and total amount per category across the entire date range?
+
+please update the readme to mimic the progress we've made since the current copy.
+
+script 6 
+
+why  strftime('%Y-%m', date) as month
+its because we want to not pull months from other years too right? but how does it work.
+-- converts to "2025-01" so we group the months specific to a year. don't want jan from 2024 and 2025 counted for example. 
+
+when we create with_lag we have order by month asc so that LAG gets the previous rows data which makes sense.
+
+in the final select we order month DESC. why do we order by DESC instead of ASC there?
+
+is it because we want to show the last three months further ahead in the script?
+the script i am referencing is here: for month in df['month'].unique()[:3]
+could you explain that line please.  
+-- .unique() returns distinct values in an array and yeah the desc is to get the last 3 months.
+ 
+with ranked merchants why the choice of row_number() over rank()?
+-- row_number doesn't tie (which i know) but due to limit we want exactly 5. fair enough. 
+
+avg_savings_rate = df['savings_rate_pct'].mean() is placed outside the for loop to do an average across all rows of that column. is my understanding correct. 
+
+explain defining current_category = None
+what's the purpose of assigning that to None? 
+do we not have a unique category for each row based on the SQL query in top_merchants_by_category?
+
+--
+This is for grouping output display. The query returns rows like:
+
+Food, Coles, 15, -450
+Food, Woolworths, 12, -380
+Transport, Shell, 8, -200
+Transport, BP, 6, -150
+
+Output becomes:
+
+Food:
+  Coles         15x  $-450.00
+  Woolworths    12x  $-380.00
+
+Transport:
+  Shell          8x  $-200.00
+  BP             6x  $-150.00
+--
+

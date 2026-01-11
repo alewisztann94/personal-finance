@@ -27,6 +27,7 @@ def run_pipeline(data_dir="synthetic"):
         ("02_load_bankwest", "load_and_process_bankwest", "Loading Bankwest data"),
         ("03_combine", "combine_transactions", "Combining transactions"),
         ("04_categorize", "categorize_transactions", "Categorizing transactions"),
+        ("05_load_to_db", "load_to_database", "Loading to SQLite database"),
     ]
 
     for module_name, func_name, description in steps:
@@ -46,6 +47,7 @@ def run_pipeline(data_dir="synthetic"):
     print("PIPELINE COMPLETED SUCCESSFULLY!")
     print("=" * 60)
     print(f"\nOutput files in: data/processed/{data_dir}/")
+    print(f"Database at: data/{data_dir}_finance.db")
     return True
 
 
