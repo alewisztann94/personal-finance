@@ -74,7 +74,3 @@ python scripts/run_pipeline.py real      # Process real data
 - Git workflow - .gitignore for sensitive data
 - Trade-offs between manual work vs. AI-assisted development
 
-## Next Steps
-
-- [ ] SQL analysis queries (monthly breakdown, spending trends, savings rate)
-- [ ] Streamlit dashboard for visualization
