@@ -5,20 +5,25 @@ Applies category rules to combined transaction data from all banks
 
 import pandas as pd
 from pathlib import Path
+import sys
 
-def categorize_transactions():
+def categorize_transactions(data_dir="synthetic"):
     """
     Categorize all transactions based on rules
+
+    Args:
+        data_dir: Either "real" or "synthetic" (default: "synthetic" for safety)
     """
     try:
-        # Define file paths
-        input_file = Path("data/processed/all_transactions_clean.csv")
+        # Define file paths based on data_dir
+        input_file = Path(f"data/processed/{data_dir}/all_transactions_clean.csv")
         rules_file = Path("data/category_rules.csv")
-        output_file = Path("data/processed/all_transactions_categorized.csv")
+        output_file = Path(f"data/processed/{data_dir}/all_transactions_categorized.csv")
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
+        print(f"Processing {data_dir.upper()} data")
         print(f"Loading combined transactions from {input_file}...")
 
         # Load combined transaction data
@@ -152,4 +157,9 @@ def categorize_transactions():
         return None
 
 if __name__ == "__main__":
-    df = categorize_transactions()
+    # Get data_dir from command line argument, default to "synthetic"
+    data_dir = sys.argv[1] if len(sys.argv) > 1 else "synthetic"
+    if data_dir not in ["real", "synthetic"]:
+        print(f"Error: data_dir must be 'real' or 'synthetic', got '{data_dir}'")
+        sys.exit(1)
+    df = categorize_transactions(data_dir)

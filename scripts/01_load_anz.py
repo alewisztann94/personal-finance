@@ -6,15 +6,19 @@ Loads raw ANZ CSV data, cleans it, and saves to processed folder
 import pandas as pd
 from pathlib import Path
 import glob
+import sys
 
-def load_and_process_anz():
+def load_and_process_anz(data_dir="synthetic"):
     """
     Load and process ANZ transaction data
+
+    Args:
+        data_dir: Either "real" or "synthetic" (default: "synthetic" for safety)
     """
     try:
-        # Define file paths
-        input_pattern = "data/raw/anz/*.csv"
-        output_file = Path("data/processed/anz_clean.csv")
+        # Define file paths based on data_dir
+        input_pattern = f"data/raw/{data_dir}/ANZ*.csv"
+        output_file = Path(f"data/processed/{data_dir}/anz_clean.csv")
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -26,6 +30,7 @@ def load_and_process_anz():
             print(f"Error: No CSV files found matching pattern '{input_pattern}'")
             return None
 
+        print(f"Processing {data_dir.upper()} data")
         print(f"Found {len(anz_files)} ANZ file(s):")
         for file in anz_files:
             print(f"  - {file}")
@@ -119,7 +124,7 @@ def load_and_process_anz():
 
     except FileNotFoundError:
         print(f"Error: Input files not found.")
-        print("Please ensure ANZ CSV files exist in data/raw/anz/")
+        print(f"Please ensure ANZ CSV files exist in data/raw/{data_dir}/")
         return None
 
     except pd.errors.ParserError as e:
@@ -131,4 +136,9 @@ def load_and_process_anz():
         return None
 
 if __name__ == "__main__":
-    df = load_and_process_anz()
+    # Get data_dir from command line argument, default to "synthetic"
+    data_dir = sys.argv[1] if len(sys.argv) > 1 else "synthetic"
+    if data_dir not in ["real", "synthetic"]:
+        print(f"Error: data_dir must be 'real' or 'synthetic', got '{data_dir}'")
+        sys.exit(1)
+    df = load_and_process_anz(data_dir)

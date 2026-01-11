@@ -5,20 +5,25 @@ Combines cleaned ANZ and Bankwest transaction data into a single dataset
 
 import pandas as pd
 from pathlib import Path
+import sys
 
-def combine_transactions():
+def combine_transactions(data_dir="synthetic"):
     """
     Combine ANZ and Bankwest transaction data
+
+    Args:
+        data_dir: Either "real" or "synthetic" (default: "synthetic" for safety)
     """
     try:
-        # Define file paths
-        anz_file = Path("data/processed/anz_clean.csv")
-        bankwest_file = Path("data/processed/bankwest_clean.csv")
-        output_file = Path("data/processed/all_transactions_clean.csv")
+        # Define file paths based on data_dir
+        anz_file = Path(f"data/processed/{data_dir}/anz_clean.csv")
+        bankwest_file = Path(f"data/processed/{data_dir}/bankwest_clean.csv")
+        output_file = Path(f"data/processed/{data_dir}/all_transactions_clean.csv")
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
+        print(f"Processing {data_dir.upper()} data")
         print("Loading cleaned transaction data...")
 
         # Load ANZ data
@@ -123,4 +128,9 @@ def combine_transactions():
         return None
 
 if __name__ == "__main__":
-    df = combine_transactions()
+    # Get data_dir from command line argument, default to "synthetic"
+    data_dir = sys.argv[1] if len(sys.argv) > 1 else "synthetic"
+    if data_dir not in ["real", "synthetic"]:
+        print(f"Error: data_dir must be 'real' or 'synthetic', got '{data_dir}'")
+        sys.exit(1)
+    df = combine_transactions(data_dir)
