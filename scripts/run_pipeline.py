@@ -23,8 +23,8 @@ def run_pipeline(data_dir="synthetic"):
     print("=" * 60)
 
     steps = [
-        ("01_load_anz", "load_and_process_anz", "Loading ANZ data"),
-        ("02_load_bankwest", "load_and_process_bankwest", "Loading Bankwest data"),
+        ("01_load_anz", "load_and_process_bank_a", "Loading Bank_A data"),
+        ("02_load_bankwest", "load_and_process_bank_b", "Loading Bank_B data"),
         ("03_combine", "combine_transactions", "Combining transactions"),
         ("04_categorize", "categorize_transactions", "Categorizing transactions"),
         ("05_load_to_db", "load_to_database", "Loading to SQLite database"),

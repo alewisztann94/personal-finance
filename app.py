@@ -50,27 +50,28 @@ st.header("Overview")
 
 trends_df = analyze.month_over_month_trends(conn)
 if not trends_df.empty:
-    latest = trends_df.iloc[0]
+    avg_expenses = trends_df['total_expenses'].mean()
+    avg_income = trends_df['total_income'].mean()
+    avg_net_savings = trends_df['net_savings'].mean()
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.metric(
-            "Latest Month Expenses",
-            f"${latest['total_expenses']:,.2f}",
-            f"{latest['expense_change_pct']:+.1f}%" if pd.notna(latest['expense_change_pct']) else None
+            "Avg Monthly Expenses",
+            f"${avg_expenses:,.2f}"
         )
 
     with col2:
         st.metric(
-            "Latest Month Income",
-            f"${latest['total_income']:,.2f}"
+            "Avg Monthly Income",
+            f"${avg_income:,.2f}"
         )
 
     with col3:
         st.metric(
-            "Net Savings",
-            f"${latest['net_savings']:,.2f}"
+            "Avg Net Savings",
+            f"${avg_net_savings:,.2f}"
         )
 
     savings_df = analyze.savings_rate(conn)
@@ -88,34 +89,36 @@ st.header("Monthly Spending Trends")
 col1, col2 = st.columns(2)
 
 with col1:
-    # Line chart of expenses vs income over time
+    # Stacked bar chart of expenses vs income over time
     if not trends_df.empty:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=trends_df['month'],
-            y=trends_df['total_expenses'],
-            name='Expenses',
-            line=dict(color='red')
-        ))
-        fig.add_trace(go.Scatter(
+        fig.add_trace(go.Bar(
             x=trends_df['month'],
             y=trends_df['total_income'],
             name='Income',
-            line=dict(color='green')
+            marker_color='green'
+        ))
+        fig.add_trace(go.Bar(
+            x=trends_df['month'],
+            y=trends_df['total_expenses'],
+            name='Expenses',
+            marker_color='red'
         ))
         fig.update_layout(
             title="Income vs Expenses Over Time",
             xaxis_title="Month",
             yaxis_title="Amount ($)",
+            barmode='group',
             hovermode='x unified'
         )
         st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    # Savings rate over time
+    # Savings rate over time (exclude Jan 2026 to avoid skewing from partial month)
     if not savings_df.empty:
+        filtered_savings = savings_df[savings_df['month'] != '2026-01']
         fig = px.bar(
-            savings_df,
+            filtered_savings,
             x='month',
             y='savings_rate_pct',
             title="Savings Rate by Month",
@@ -131,42 +134,48 @@ st.header("Spending by Category")
 
 category_df = analyze.monthly_spend_by_category(conn)
 
-col1, col2 = st.columns(2)
+if not category_df.empty:
+    months = category_df['month'].unique()
+    
 
-with col1:
-    # Select month for pie chart
-    if not category_df.empty:
-        months = category_df['month'].unique()
-        selected_month = st.selectbox("Select Month", months)
+    # Category spending over time (stacked bar) - below the dropdown
+    # Pivot for stacked bar
+    pivot_df = category_df.pivot(index='month', columns='category', values='category_total').fillna(0)
+    pivot_df = pivot_df.abs()  # Make positive for visualization
 
-        month_data = category_df[category_df['month'] == selected_month]
+    # Custom color map to differentiate Dining Out from Uncategorized
+    color_map = {
+        'Dining Out': '#FF6B6B',
+        'Uncategorized': '#808080',
+    }
 
-        fig = px.pie(
-            month_data,
-            values='category_total',
-            names='category',
-            title=f"Spending Breakdown - {selected_month}",
-            hole=0.4
-        )
-        fig.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.bar(
+        pivot_df.reset_index(),
+        x='month',
+        y=pivot_df.columns.tolist(),
+        title="Category Spending Over Time",
+        labels={'value': 'Amount ($)', 'month': 'Month', 'variable': 'Category'},
+        barmode='stack',
+        color_discrete_map=color_map
+    )
+    fig.update_layout(legend_title_text='Category')
+    st.plotly_chart(fig, use_container_width=True)
 
-with col2:
-    # Category totals over time (stacked bar)
-    if not category_df.empty:
-        # Pivot for stacked bar
-        pivot_df = category_df.pivot(index='month', columns='category', values='category_total').fillna(0)
-        pivot_df = pivot_df.abs()  # Make positive for visualization
+    # Pie chart for selected month
+    selected_month = st.selectbox("Select Month", months)
+    month_data = category_df[category_df['month'] == selected_month].copy()
+    month_data['category_total'] = month_data['category_total'].abs()
 
-        fig = px.bar(
-            pivot_df.reset_index(),
-            x='month',
-            y=pivot_df.columns.tolist(),
-            title="Category Spending Over Time",
-            labels={'value': 'Amount ($)', 'month': 'Month'},
-            barmode='stack'
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    fig_pie = px.pie(
+        month_data,
+        values='category_total',
+        names='category',
+        title=f"Spending Breakdown - {selected_month}",
+        hole=0.4,
+        color_discrete_map=color_map
+    )
+    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+    st.plotly_chart(fig_pie, use_container_width=True)
 
 # Top merchants
 st.header("Top Merchants by Category")
@@ -189,8 +198,8 @@ if not merchants_df.empty:
         labels={'total_amount': 'Total Spent ($)', 'merchant': 'Merchant'},
         text='transaction_count'
     )
-    fig.update_traces(texttemplate='%{text}x', textposition='outside')
-    fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+    fig.update_traces(texttemplate='%{text} txs', textposition='outside')
+    fig.update_layout(yaxis={'categoryorder': 'total descending'})
     st.plotly_chart(fig, use_container_width=True)
 
 # Category summary table

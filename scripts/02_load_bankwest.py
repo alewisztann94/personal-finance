@@ -1,6 +1,6 @@
 """
-Bankwest Transaction Data Processing Script
-Loads raw Bankwest CSV data, cleans it, and saves to processed folder
+Bank_B Transaction Data Processing Script
+Loads raw Bank_B CSV data, cleans it, and saves to processed folder
 """
 
 import pandas as pd
@@ -8,85 +8,85 @@ from pathlib import Path
 import glob
 import sys
 
-def load_and_process_bankwest(data_dir="synthetic"):
+def load_and_process_bank_b(data_dir="synthetic"):
     """
-    Load and process Bankwest transaction data
+    Load and process Bank_B transaction data
 
     Args:
         data_dir: Either "real" or "synthetic" (default: "synthetic" for safety)
     """
     try:
         # Define file paths based on data_dir
-        input_pattern = f"data/raw/{data_dir}/bankwest*.csv"
-        output_file = Path(f"data/processed/{data_dir}/bankwest_clean.csv")
+        input_pattern = f"data/raw/{data_dir}/bank_b*.csv"
+        output_file = Path(f"data/processed/{data_dir}/bank_b_clean.csv")
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        # Find all Bankwest CSV files
-        bankwest_files = glob.glob(input_pattern)
+        # Find all Bank_B CSV files
+        bank_b_files = glob.glob(input_pattern)
 
-        if not bankwest_files:
+        if not bank_b_files:
             print(f"Error: No CSV files found matching pattern '{input_pattern}'")
             return None
 
         print(f"Processing {data_dir.upper()} data")
-        print(f"Found {len(bankwest_files)} Bankwest file(s):")
-        for file in bankwest_files:
+        print(f"Found {len(bank_b_files)} Bank_B file(s):")
+        for file in bank_b_files:
             print(f"  - {file}")
 
-        # Load all Bankwest CSV files
+        # Load all Bank_B CSV files
         all_data = []
-        for file in bankwest_files:
+        for file in bank_b_files:
             print(f"\nLoading data from {file}...")
             df = pd.read_csv(file)
             all_data.append(df)
             print(f"  Loaded {len(df)} rows")
 
         # Combine all data
-        bankwest_df = pd.concat(all_data, ignore_index=True)
-        print(f"\nTotal rows loaded: {len(bankwest_df)}")
+        bank_b_df = pd.concat(all_data, ignore_index=True)
+        print(f"\nTotal rows loaded: {len(bank_b_df)}")
 
         # Parse dates from DD/MM/YYYY format to datetime
-        bankwest_df["Transaction Date"] = pd.to_datetime(
-            bankwest_df["Transaction Date"],
+        bank_b_df["Transaction Date"] = pd.to_datetime(
+            bank_b_df["Transaction Date"],
             format="%d/%m/%Y"
         )
 
         # Create amount column by combining Debit and Credit
         # Debit values are already negative in the CSV, Credit values are positive
-        bankwest_df["amount"] = 0.0
+        bank_b_df["amount"] = 0.0
 
         # Handle Debit column (expenses) - already negative, so just copy
-        bankwest_df.loc[bankwest_df["Debit"].notna(), "amount"] = (
-            bankwest_df.loc[bankwest_df["Debit"].notna(), "Debit"]
+        bank_b_df.loc[bank_b_df["Debit"].notna(), "amount"] = (
+            bank_b_df.loc[bank_b_df["Debit"].notna(), "Debit"]
         )
 
         # Handle Credit column (income) - already positive, so just copy
-        bankwest_df.loc[bankwest_df["Credit"].notna(), "amount"] = (
-            bankwest_df.loc[bankwest_df["Credit"].notna(), "Credit"]
+        bank_b_df.loc[bank_b_df["Credit"].notna(), "amount"] = (
+            bank_b_df.loc[bank_b_df["Credit"].notna(), "Credit"]
         )
 
         # Uppercase and trim descriptions (use Narration field)
-        bankwest_df["description"] = (
-            bankwest_df["Narration"]
+        bank_b_df["description"] = (
+            bank_b_df["Narration"]
             .str.strip()
             .str.upper()
         )
 
         # Flag positive amounts as 'income', negative as 'expense'
-        bankwest_df["transaction_type"] = bankwest_df["amount"].apply(
+        bank_b_df["transaction_type"] = bank_b_df["amount"].apply(
             lambda x: "income" if x > 0 else "expense"
         )
 
         # Add source column
-        bankwest_df["source"] = "Bankwest"
+        bank_b_df["source"] = "Bank_B"
 
         # Rename Transaction Date to date for consistency
-        bankwest_df = bankwest_df.rename(columns={"Transaction Date": "date"})
+        bank_b_df = bank_b_df.rename(columns={"Transaction Date": "date"})
 
         # Select and reorder columns to match ANZ format
-        bankwest_df = bankwest_df[[
+        bank_b_df = bank_b_df[[
             "date",
             "amount",
             "description",
@@ -95,18 +95,27 @@ def load_and_process_bankwest(data_dir="synthetic"):
         ]]
 
         # Remove duplicates (in case same transaction appears in multiple files)
-        original_count = len(bankwest_df)
-        bankwest_df = bankwest_df.drop_duplicates(
+        original_count = len(bank_b_df)
+        bank_b_df = bank_b_df.drop_duplicates(
             subset=["date", "amount", "description"],
             keep="first"
         )
-        duplicates_removed = original_count - len(bankwest_df)
+        duplicates_removed = original_count - len(bank_b_df)
 
         if duplicates_removed > 0:
             print(f"\nRemoved {duplicates_removed} duplicate transactions")
 
+        # Filter to date range: 2024-01-01 to 2025-12-31
+        start_date = pd.Timestamp("2024-01-01")
+        end_date = pd.Timestamp("2025-12-31")
+        before_filter = len(bank_b_df)
+        bank_b_df = bank_b_df[(bank_b_df["date"] >= start_date) & (bank_b_df["date"] <= end_date)]
+        filtered_out = before_filter - len(bank_b_df)
+        if filtered_out > 0:
+            print(f"Filtered out {filtered_out} transactions outside 2024-01-01 to 2025-12-31")
+
         # Save to processed folder
-        bankwest_df.to_csv(output_file, index=False)
+        bank_b_df.to_csv(output_file, index=False)
         print(f"\nData saved to {output_file}")
 
         # Print summary statistics
@@ -115,14 +124,14 @@ def load_and_process_bankwest(data_dir="synthetic"):
         print("="*60)
 
         # Date range
-        date_min = bankwest_df["date"].min()
-        date_max = bankwest_df["date"].max()
+        date_min = bank_b_df["date"].min()
+        date_max = bank_b_df["date"].max()
         print(f"\nDate Range: {date_min.strftime('%d/%m/%Y')} to {date_max.strftime('%d/%m/%Y')}")
 
         # Transaction counts
-        total_transactions = len(bankwest_df)
-        income_count = len(bankwest_df[bankwest_df["transaction_type"] == "income"])
-        expense_count = len(bankwest_df[bankwest_df["transaction_type"] == "expense"])
+        total_transactions = len(bank_b_df)
+        income_count = len(bank_b_df[bank_b_df["transaction_type"] == "income"])
+        expense_count = len(bank_b_df[bank_b_df["transaction_type"] == "expense"])
 
         print(f"\nTransaction Counts:")
         print(f"  Total:    {total_transactions:>6}")
@@ -130,9 +139,9 @@ def load_and_process_bankwest(data_dir="synthetic"):
         print(f"  Expense:  {expense_count:>6}")
 
         # Totals
-        total_income = bankwest_df[bankwest_df["transaction_type"] == "income"]["amount"].sum()
-        total_expense = bankwest_df[bankwest_df["transaction_type"] == "expense"]["amount"].sum()
-        net_total = bankwest_df["amount"].sum()
+        total_income = bank_b_df[bank_b_df["transaction_type"] == "income"]["amount"].sum()
+        total_expense = bank_b_df[bank_b_df["transaction_type"] == "expense"]["amount"].sum()
+        net_total = bank_b_df["amount"].sum()
 
         print(f"\nTransaction Totals:")
         print(f"  Total Income:  ${total_income:>12,.2f}")
@@ -143,11 +152,11 @@ def load_and_process_bankwest(data_dir="synthetic"):
         print("Processing completed successfully!")
         print("="*60)
 
-        return bankwest_df
+        return bank_b_df
 
     except FileNotFoundError:
         print(f"Error: Input files not found.")
-        print(f"Please ensure Bankwest CSV files exist in data/raw/{data_dir}/")
+        print(f"Please ensure Bank_B CSV files exist in data/raw/{data_dir}/")
         return None
 
     except pd.errors.ParserError as e:
@@ -166,4 +175,4 @@ if __name__ == "__main__":
     if data_dir not in ["real", "synthetic"]:
         print(f"Error: data_dir must be 'real' or 'synthetic', got '{data_dir}'")
         sys.exit(1)
-    df = load_and_process_bankwest(data_dir)
+    df = load_and_process_bank_b(data_dir)
