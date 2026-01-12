@@ -17,8 +17,8 @@ personal-finance/
 │   │   └── synthetic/         # Processed synthetic data
 │   └── category_rules.csv     # Pattern matching rules for categorization
 ├── scripts/
-│   ├── 01_load_anz.py         # Load and clean ANZ transactions
-│   ├── 02_load_bankwest.py    # Load and clean Bankwest transactions
+│   ├── 01_load_bank_a.py      # Load and clean Bank A transactions
+│   ├── 02_load_bank_b.py      # Load and clean Bank B transactions
 │   ├── 03_combine.py          # Combine data from all banks
 │   ├── 04_categorize.py       # Categorize transactions using rules
 │   ├── 05_load_to_db.py       # Load to SQLite database
@@ -42,8 +42,8 @@ python scripts/run_pipeline.py real      # Process real data
 
 | Step | Script | Description |
 |------|--------|-------------|
-| 1 | `01_load_anz.py` | Load ANZ CSV, parse dates, normalize descriptions |
-| 2 | `02_load_bankwest.py` | Load Bankwest CSV, combine debit/credit columns |
+| 1 | `01_load_bank_a.py` | Load Bank A CSV, parse dates, normalize descriptions |
+| 2 | `02_load_bank_b.py` | Load Bank B CSV, combine debit/credit columns |
 | 3 | `03_combine.py` | Merge both banks into single dataset |
 | 4 | `04_categorize.py` | Apply category rules via pattern matching |
 | 5 | `05_load_to_db.py` | Load to SQLite for SQL analysis |
@@ -51,7 +51,7 @@ python scripts/run_pipeline.py real      # Process real data
 ## Technical Approach
 
 **Data Loading & Cleaning:**
-- Python scripts load raw CSVs from ANZ and Bankwest
+- Python scripts load raw CSVs from multiple bank accounts
 - Each bank has different CSV formats - scripts normalize to common schema
 - Dates parsed to datetime, amounts to float, descriptions uppercased
 
