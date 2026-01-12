@@ -114,79 +114,67 @@ def generate_amount(category):
     return round(amount, 2)
 
 
-def generate_anz_transactions(num_transactions=300, start_date=None, end_date=None):
+def generate_bank_a_transactions(start_date, end_date):
     """
-    Generate synthetic ANZ transactions
-    ANZ format: date, amount, description (no header)
+    Generate synthetic Bank_A transactions with realistic spacing
+    Bank_A format: date, amount, description (no header)
     """
-    if end_date is None:
-        end_date = datetime.now()
-    if start_date is None:
-        start_date = end_date - timedelta(days=365)
-
     transactions = []
     categories = list(CATEGORY_WEIGHTS.keys())
     weights = list(CATEGORY_WEIGHTS.values())
 
-    # Generate expense transactions (~85%)
-    num_expenses = int(num_transactions * 0.85)
-    for _ in range(num_expenses):
-        category = random.choices(categories, weights=weights)[0]
-        date = start_date + timedelta(days=random.randint(0, (end_date - start_date).days))
-        amount = -generate_amount(category)  # Negative for expenses
-        description = generate_merchant(category)
-        transactions.append({
-            "date": date.strftime("%d/%m/%Y"),
-            "amount": f"{amount:.2f}",
-            "description": description
-        })
+    current_date = start_date
 
-    # Generate income transactions (~15%)
-    num_income = num_transactions - num_expenses
-    income_sources = [
-        ("SALARY EMPLOYER PTY LTD", 2500, 3500),
-        ("TAX REFUND ATO", 200, 800),
-        ("INTEREST PAYMENT", 5, 50),
-        ("REFUND", 20, 150),
-    ]
+    while current_date <= end_date:
+        # Generate 0-3 transactions per day, weighted toward weekends
+        is_weekend = current_date.weekday() >= 5
+        num_today = random.choices([0, 1, 2, 3], weights=[30, 45, 20, 5] if not is_weekend else [20, 35, 30, 15])[0]
 
-    for _ in range(num_income):
-        source, min_amt, max_amt = random.choice(income_sources)
-        date = start_date + timedelta(days=random.randint(0, (end_date - start_date).days))
-        amount = round(random.uniform(min_amt, max_amt), 2)
-        transactions.append({
-            "date": date.strftime("%d/%m/%Y"),
-            "amount": f"{amount:.2f}",
-            "description": source
-        })
+        for _ in range(num_today):
+            category = random.choices(categories, weights=weights)[0]
+            amount = -generate_amount(category)  # Negative for expenses
+            description = generate_merchant(category)
+            transactions.append({
+                "date": current_date.strftime("%d/%m/%Y"),
+                "amount": f"{amount:.2f}",
+                "description": description
+            })
 
-    # Sort by date descending (newest first, like real ANZ exports)
+        # Move to next day (min 1 day between transaction batches)
+        current_date += timedelta(days=1)
+
+    # Sort by date descending (newest first, like real exports)
     transactions.sort(key=lambda x: datetime.strptime(x["date"], "%d/%m/%Y"), reverse=True)
 
     return pd.DataFrame(transactions)
 
 
-def generate_bankwest_transactions(num_transactions=50, start_date=None, end_date=None):
+def generate_bank_b_transactions(start_date, end_date):
     """
-    Generate synthetic Bankwest transactions
-    Bankwest format: BSB Number,Account Number,Transaction Date,Narration,Cheque Number,Debit,Credit,Balance,Transaction Type
+    Generate synthetic Bank_B transactions with fortnightly salary
+    Bank_B format: BSB Number,Account Number,Transaction Date,Narration,Cheque Number,Debit,Credit,Balance,Transaction Type
     """
-    if end_date is None:
-        end_date = datetime.now()
-    if start_date is None:
-        start_date = end_date - timedelta(days=365)
-
     transactions = []
 
-    # Bankwest typically has fewer transactions (savings/salary account)
-    # Generate salary deposits
+    # $75,000/year = $2,885 per fortnight (before tax ~$2,400 net)
+    base_salary = 2885
+    salary_variation = 0.05  # ±5%
+
+    # Start balance
+    balance = round(random.uniform(5000, 10000), 2)
+
+    # First payday - find first Thursday after start_date
     current_date = start_date
-    balance = round(random.uniform(3000, 8000), 2)
+    while current_date.weekday() != 3:  # Thursday
+        current_date += timedelta(days=1)
+    next_payday = current_date
+
+    current_date = start_date
 
     while current_date <= end_date:
-        # Salary every 2 weeks
-        if random.random() < 0.5:  # ~fortnightly
-            salary = round(random.uniform(2400, 2600), 2)
+        # Salary every 14 days on Thursday
+        if current_date == next_payday:
+            salary = round(base_salary * random.uniform(1 - salary_variation, 1 + salary_variation), 2)
             balance += salary
             transactions.append({
                 "BSB Number": "000-000",
@@ -199,16 +187,17 @@ def generate_bankwest_transactions(num_transactions=50, start_date=None, end_dat
                 "Balance": round(balance, 2),
                 "Transaction Type": "PAY"
             })
+            next_payday = current_date + timedelta(days=14)
 
-        # Rent payments
-        if current_date.weekday() == 0 and random.random() < 0.3:  # Some Mondays
-            rent = 300.00
+        # Rent payments - every Monday
+        if current_date.weekday() == 0:
+            rent = 350.00
             balance -= rent
             transactions.append({
                 "BSB Number": "000-000",
                 "Account Number": "9999999",
                 "Transaction Date": current_date.strftime("%d/%m/%Y"),
-                "Narration": "RENT",
+                "Narration": "RENT PAYMENT",
                 "Cheque Number": "",
                 "Debit": -rent,
                 "Credit": "",
@@ -216,15 +205,31 @@ def generate_bankwest_transactions(num_transactions=50, start_date=None, end_dat
                 "Transaction Type": "WDL"
             })
 
-        # Occasional transfers
-        if random.random() < 0.05:
-            transfer_amt = round(random.uniform(100, 500), 2)
+        # Monthly bills (utilities) - around 15th of month
+        if current_date.day == 15:
+            bill_amt = round(random.uniform(80, 200), 2)
+            balance -= bill_amt
+            transactions.append({
+                "BSB Number": "000-000",
+                "Account Number": "9999999",
+                "Transaction Date": current_date.strftime("%d/%m/%Y"),
+                "Narration": "SYNERGY ELECTRICITY",
+                "Cheque Number": "",
+                "Debit": -bill_amt,
+                "Credit": "",
+                "Balance": round(balance, 2),
+                "Transaction Type": "WDL"
+            })
+
+        # Occasional transfers to savings (1-2 per month)
+        if current_date.day in [5, 20] and random.random() < 0.7:
+            transfer_amt = round(random.uniform(200, 600), 2)
             balance -= transfer_amt
             transactions.append({
                 "BSB Number": "000-000",
                 "Account Number": "9999999",
                 "Transaction Date": current_date.strftime("%d/%m/%Y"),
-                "Narration": f"IB TRANSFER TO SAVINGS",
+                "Narration": "IB TRANSFER TO SAVINGS",
                 "Cheque Number": "",
                 "Debit": -transfer_amt,
                 "Credit": "",
@@ -248,40 +253,37 @@ def main():
     output_dir = Path("data/raw/synthetic")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate date range (1 year)
-    end_date = datetime(2026, 1, 6)  # Match your real data's latest date
-    start_date = end_date - timedelta(days=365)
+    # Full 12 months of 2025 only
+    start_date = datetime(2025, 1, 1)
+    end_date = datetime(2025, 12, 31)
 
     print("Generating synthetic transaction data...")
     print(f"Date range: {start_date.strftime('%d/%m/%Y')} to {end_date.strftime('%d/%m/%Y')}")
 
-    # Generate ANZ transactions
-    print("\nGenerating ANZ transactions...")
-    anz_df = generate_anz_transactions(300, start_date, end_date)
-    anz_output = output_dir / "ANZ.csv"
-    anz_df.to_csv(anz_output, index=False, header=False)
-    print(f"  Generated {len(anz_df)} ANZ transactions")
-    print(f"  Saved to {anz_output}")
+    # Generate Bank_A transactions
+    print("\nGenerating Bank_A transactions...")
+    bank_a_df = generate_bank_a_transactions(start_date, end_date)
+    bank_a_output = output_dir / "Bank_A.csv"
+    bank_a_df.to_csv(bank_a_output, index=False, header=False)
+    print(f"  Generated {len(bank_a_df)} Bank_A transactions")
+    print(f"  Saved to {bank_a_output}")
 
-    # Generate Bankwest transactions
-    print("\nGenerating Bankwest transactions...")
-    bankwest_df = generate_bankwest_transactions(50, start_date, end_date)
-    bankwest_output = output_dir / "bankwest.csv"
-    bankwest_df.to_csv(bankwest_output, index=False)
-    print(f"  Generated {len(bankwest_df)} Bankwest transactions")
-    print(f"  Saved to {bankwest_output}")
+    # Generate Bank_B transactions
+    print("\nGenerating Bank_B transactions...")
+    bank_b_df = generate_bank_b_transactions(start_date, end_date)
+    bank_b_output = output_dir / "Bank_B.csv"
+    bank_b_df.to_csv(bank_b_output, index=False)
+    print(f"  Generated {len(bank_b_df)} Bank_B transactions")
+    print(f"  Saved to {bank_b_output}")
 
     print("\n" + "="*60)
     print("Synthetic data generation complete!")
     print("="*60)
     print(f"\nFiles created:")
-    print(f"  - {anz_output}")
-    print(f"  - {bankwest_output}")
+    print(f"  - {bank_a_output}")
+    print(f"  - {bank_b_output}")
     print(f"\nYou can now run the processing pipeline with:")
-    print(f"  python scripts/01_load_anz.py synthetic")
-    print(f"  python scripts/02_load_bankwest.py synthetic")
-    print(f"  python scripts/03_combine.py synthetic")
-    print(f"  python scripts/04_categorize.py synthetic")
+    print(f"  python scripts/run_pipeline.py synthetic")
 
 
 if __name__ == "__main__":

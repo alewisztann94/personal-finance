@@ -1,6 +1,6 @@
 """
 Transaction Data Combination Script
-Combines cleaned ANZ and Bankwest transaction data into a single dataset
+Combines cleaned Bank_A and Bank_B transaction data into a single dataset
 """
 
 import pandas as pd
@@ -9,15 +9,15 @@ import sys
 
 def combine_transactions(data_dir="synthetic"):
     """
-    Combine ANZ and Bankwest transaction data
+    Combine Bank_A and Bank_B transaction data
 
     Args:
         data_dir: Either "real" or "synthetic" (default: "synthetic" for safety)
     """
     try:
         # Define file paths based on data_dir
-        anz_file = Path(f"data/processed/{data_dir}/anz_clean.csv")
-        bankwest_file = Path(f"data/processed/{data_dir}/bankwest_clean.csv")
+        bank_a_file = Path(f"data/processed/{data_dir}/bank_a_clean.csv")
+        bank_b_file = Path(f"data/processed/{data_dir}/bank_b_clean.csv")
         output_file = Path(f"data/processed/{data_dir}/all_transactions_clean.csv")
 
         # Create output directory if it doesn't exist
@@ -26,26 +26,26 @@ def combine_transactions(data_dir="synthetic"):
         print(f"Processing {data_dir.upper()} data")
         print("Loading cleaned transaction data...")
 
-        # Load ANZ data
-        if anz_file.exists():
-            anz_df = pd.read_csv(anz_file)
-            anz_df['date'] = pd.to_datetime(anz_df['date'])
-            print(f"  ANZ: {len(anz_df)} transactions")
+        # Load Bank_A data
+        if bank_a_file.exists():
+            bank_a_df = pd.read_csv(bank_a_file)
+            bank_a_df['date'] = pd.to_datetime(bank_a_df['date'])
+            print(f"  Bank_A: {len(bank_a_df)} transactions")
         else:
-            print(f"  Warning: {anz_file} not found, skipping ANZ data")
-            anz_df = pd.DataFrame(columns=["date", "amount", "description", "transaction_type", "source"])
+            print(f"  Warning: {bank_a_file} not found, skipping Bank_A data")
+            bank_a_df = pd.DataFrame(columns=["date", "amount", "description", "transaction_type", "source"])
 
-        # Load Bankwest data
-        if bankwest_file.exists():
-            bankwest_df = pd.read_csv(bankwest_file)
-            bankwest_df['date'] = pd.to_datetime(bankwest_df['date'])
-            print(f"  Bankwest: {len(bankwest_df)} transactions")
+        # Load Bank_B data
+        if bank_b_file.exists():
+            bank_b_df = pd.read_csv(bank_b_file)
+            bank_b_df['date'] = pd.to_datetime(bank_b_df['date'])
+            print(f"  Bank_B: {len(bank_b_df)} transactions")
         else:
-            print(f"  Warning: {bankwest_file} not found, skipping Bankwest data")
-            bankwest_df = pd.DataFrame(columns=["date", "amount", "description", "transaction_type", "source"])
+            print(f"  Warning: {bank_b_file} not found, skipping Bank_B data")
+            bank_b_df = pd.DataFrame(columns=["date", "amount", "description", "transaction_type", "source"])
 
         # Combine data
-        combined_df = pd.concat([anz_df, bankwest_df], ignore_index=True)
+        combined_df = pd.concat([bank_a_df, bank_b_df], ignore_index=True)
 
         if len(combined_df) == 0:
             print("\nError: No transaction data found to combine")

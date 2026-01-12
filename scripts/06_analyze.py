@@ -164,18 +164,28 @@ def top_merchants_by_category(conn, limit=5):
 def category_summary(conn):
     """
     Overall category summary across all time
+    Min/max ranked by absolute value (largest magnitude transactions)
     """
     query = """
+    WITH ranked AS (
+        SELECT
+            category,
+            amount,
+            ROW_NUMBER() OVER (PARTITION BY category ORDER BY ABS(amount) ASC) as min_rank,
+            ROW_NUMBER() OVER (PARTITION BY category ORDER BY ABS(amount) DESC) as max_rank
+        FROM transactions
+        WHERE category NOT IN ('Transfer')
+    )
     SELECT
-        category,
+        t.category,
         COUNT(*) as transaction_count,
-        SUM(amount) as total_amount,
-        AVG(amount) as avg_amount,
-        MIN(amount) as min_amount,
-        MAX(amount) as max_amount
-    FROM transactions
-    WHERE category NOT IN ('Transfer')
-    GROUP BY category
+        SUM(t.amount) as total_amount,
+        AVG(t.amount) as avg_amount,
+        (SELECT amount FROM ranked r WHERE r.category = t.category AND r.min_rank = 1) as min_amount,
+        (SELECT amount FROM ranked r WHERE r.category = t.category AND r.max_rank = 1) as max_amount
+    FROM transactions t
+    WHERE t.category NOT IN ('Transfer')
+    GROUP BY t.category
     ORDER BY total_amount ASC
     """
     return pd.read_sql_query(query, conn)

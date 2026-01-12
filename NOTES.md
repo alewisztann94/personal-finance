@@ -346,3 +346,49 @@ Transport:
   BP             6x  $-150.00
 --
 
+12/01/26
+
+app.py / overview
+
+the synthetic data generator is quite unrealistic, it ramped up the overall income to 530k in just over a year, also there are times when data points generated are in consecutive days.
+
+would need to explicitly prompt claude to pay income on a fortnightly basis.
+
+also should have omitted the start of jan, it's throwing the monthly totals off because i didn't include a full month of transactions.
+
+the real data source allows better clarity and makes more sense. 
+
+changes:
+
+income vs expenses over time: let's turn this into a stacked bar chart.
+
+savings rate by month: let's omit January 2026 to avoid skewing the saving rates.
+
+Categorise payments to "Kok Eng" under housing.
+
+Clean up the UX for Spending by Category. Remove "Spending Breakdown - 2026-01" header, and have the Category Spending Over Time chart underneath the "Select Month" drop down.
+Change the colour of the Dining Out variable so it's easier to differentiate from Uncategorized.
+
+Change the legend header from "variable" to "category".
+
+For the Top Merchants by Category visualization, order the most expensive merchants at the top of the visualization. Instead of 'x' on the outside of the bars, change it to 'transactions'.
+
+"Kok Eng" wasn't being categorized because start of Tx is "To Phone" which was being picked up by "Pho" in the Dining Out category. Moved Transfers and Housing to top of categories list for precedence. 
+
+Going to assess why my expenses seem to be incorrect. 10k Jan 2025 can't be right. 
+
+Also you can make changes to app.py and streamlit will serve the changes as you're developing. 
+
+For category summary rank the min and max transactions by absolute value. 
+
+give me the breakdown for real expenses in January 2025. It seems unnaturally high and i want to audit this. 
+
+everything checks out on audit. 
+
+to make things cleaner i'm going to remove January 26 transactions so we have a clean view per month. 
+
+parse through our real data sources and ensure we only have transactions from 01-01-2024 to 31-12-25.
+
+For the Overview of app.py turn Latest Month Expenses into Average Monthly Expenses and Latest Month Income into Average Monthly Income. 
+
+anonymize the name of my banks in the scripts. probably overkill but we want to minimize any potential personally identifiable information.
