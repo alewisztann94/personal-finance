@@ -392,3 +392,5 @@ parse through our real data sources and ensure we only have transactions from 01
 For the Overview of app.py turn Latest Month Expenses into Average Monthly Expenses and Latest Month Income into Average Monthly Income. 
 
 anonymize the name of my banks in the scripts. probably overkill but we want to minimize any potential personally identifiable information.
+
+well previous git activity identifies ANZ and bankwest which is just a lesson to think carefully and plan prior to building. i could force push to rewrite. will leave it as is. 
