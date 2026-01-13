@@ -7,6 +7,10 @@ import pandas as pd
 import sqlite3
 from pathlib import Path
 import sys
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 
 def load_to_database(data_dir="synthetic"):
@@ -21,8 +25,9 @@ def load_to_database(data_dir="synthetic"):
     """
     try:
         # Define file paths
-        input_file = Path(f"data/processed/{data_dir}/all_transactions_categorized.csv")
-        db_file = Path(f"data/{data_dir}_finance.db")
+        data_root = get_data_root()
+        input_file = data_root / "processed" / data_dir / "all_transactions_categorized.csv"
+        db_file = data_root / f"{data_dir}_finance.db"
 
         # Create data directory if needed
         db_file.parent.mkdir(parents=True, exist_ok=True)

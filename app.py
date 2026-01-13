@@ -9,11 +9,27 @@ import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
 import sqlite3
+import os
+import shutil
 
 # Import analysis module (using importlib to handle numeric prefix in filename)
 import importlib.util
 
 SCRIPTS_DIR = Path(__file__).parent / "scripts"
+REPO_DATA_DIR = Path(__file__).parent / "data"
+
+def get_writable_data_root():
+    preferred = REPO_DATA_DIR
+    try:
+        preferred.mkdir(parents=True, exist_ok=True)
+        test_file = preferred / ".write_test"
+        test_file.write_text("ok")
+        test_file.unlink()
+        return preferred
+    except Exception:
+        fallback = Path.home() / ".personal_finance_data"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback
 
 def load_module(module_name, file_path):
     spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -25,13 +41,22 @@ analyze = load_module("analyze", SCRIPTS_DIR / "06_analyze.py")
 pipeline = load_module("run_pipeline", SCRIPTS_DIR / "run_pipeline.py")
 synthetic_gen = load_module("generate_synthetic_data", SCRIPTS_DIR / "generate_synthetic_data.py")
 
+DATA_ROOT = get_writable_data_root()
+os.environ["PF_DATA_ROOT"] = str(DATA_ROOT)
+
+if DATA_ROOT != REPO_DATA_DIR:
+    source_rules = REPO_DATA_DIR / "category_rules.csv"
+    dest_rules = DATA_ROOT / "category_rules.csv"
+    if source_rules.exists() and not dest_rules.exists():
+        shutil.copyfile(source_rules, dest_rules)
+
 @st.cache_resource
 def ensure_synthetic_db():
-    db_file = Path("data/synthetic_finance.db")
+    db_file = DATA_ROOT / "synthetic_finance.db"
     if db_file.exists():
         return
 
-    raw_dir = Path("data/raw/synthetic")
+    raw_dir = DATA_ROOT / "raw" / "synthetic"
     raw_dir.mkdir(parents=True, exist_ok=True)
     bank_a = raw_dir / "Bank_A.csv"
     bank_b = raw_dir / "Bank_B.csv"
@@ -61,7 +86,7 @@ if data_dir == "synthetic":
     ensure_synthetic_db()
 
 # Check if database exists
-db_file = Path(f"data/{data_dir}_finance.db")
+db_file = DATA_ROOT / f"{data_dir}_finance.db"
 if not db_file.exists():
     st.error(f"Database not found: {db_file}")
     st.info("Run the pipeline first: `python scripts/run_pipeline.py`")

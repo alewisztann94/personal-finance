@@ -7,6 +7,10 @@ import pandas as pd
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 # Realistic merchant patterns by category
 MERCHANTS = {
@@ -250,7 +254,7 @@ def generate_bank_b_transactions(start_date, end_date):
 
 def main():
     """Generate synthetic data and save to files"""
-    output_dir = Path("data/raw/synthetic")
+    output_dir = get_data_root() / "raw" / "synthetic"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Full 12 months of 2025 only

@@ -7,11 +7,15 @@ import sqlite3
 import pandas as pd
 from pathlib import Path
 import sys
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 
 def get_connection(data_dir="synthetic"):
     """Get database connection"""
-    db_file = Path(f"data/{data_dir}_finance.db")
+    db_file = get_data_root() / f"{data_dir}_finance.db"
     if not db_file.exists():
         print(f"Error: Database not found: {db_file}")
         print("Run the pipeline first: python scripts/run_pipeline.py")
