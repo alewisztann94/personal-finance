@@ -93,7 +93,7 @@ if not db_file.exists():
     st.stop()
 
 # Get database connection
-conn = analyze.get_connection(data_dir)
+conn = sqlite3.connect(db_file)
 
 # Title
 st.title("Personal Finance Dashboard")
