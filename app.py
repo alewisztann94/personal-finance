@@ -12,9 +12,34 @@ import sqlite3
 
 # Import analysis module (using importlib to handle numeric prefix in filename)
 import importlib.util
-spec = importlib.util.spec_from_file_location("analyze", Path(__file__).parent / "scripts" / "06_analyze.py")
-analyze = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(analyze)
+
+SCRIPTS_DIR = Path(__file__).parent / "scripts"
+
+def load_module(module_name, file_path):
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+analyze = load_module("analyze", SCRIPTS_DIR / "06_analyze.py")
+pipeline = load_module("run_pipeline", SCRIPTS_DIR / "run_pipeline.py")
+synthetic_gen = load_module("generate_synthetic_data", SCRIPTS_DIR / "generate_synthetic_data.py")
+
+@st.cache_resource
+def ensure_synthetic_db():
+    db_file = Path("data/synthetic_finance.db")
+    if db_file.exists():
+        return
+
+    raw_dir = Path("data/raw/synthetic")
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    bank_a = raw_dir / "Bank_A.csv"
+    bank_b = raw_dir / "Bank_B.csv"
+
+    if not bank_a.exists() or not bank_b.exists():
+        synthetic_gen.main()
+
+    pipeline.run_pipeline("synthetic")
 
 # Page config
 st.set_page_config(
@@ -30,6 +55,10 @@ data_dir = st.sidebar.selectbox(
     ["synthetic", "real"],
     help="Select which dataset to analyze"
 )
+
+# Ensure synthetic data exists on first run (for Streamlit Cloud)
+if data_dir == "synthetic":
+    ensure_synthetic_db()
 
 # Check if database exists
 db_file = Path(f"data/{data_dir}_finance.db")

@@ -2,7 +2,7 @@
 
 A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
-See NOTES.md for my detailed learning notes and thought process throughout this project.
+See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ## Features
 
@@ -60,6 +60,18 @@ uv run streamlit run app.py
 
 **Note:** If you're using different banks, you'll need to adapt the load scripts (`01_load_bank_a.py`, `02_load_bank_b.py`) to match your bank's CSV format and column structure.
 
+## Streamlit Community Cloud Deployment (Synthetic Data)
+
+This repo is set up to generate synthetic data and build the SQLite database automatically on first run.
+
+1. Push this repository to GitHub (public or private).
+2. In Streamlit Community Cloud, click "New app".
+3. Select your repo/branch and set the main file to `app.py`.
+4. The app will build using `requirements.txt` and `runtime.txt`.
+5. On first launch, the app creates synthetic data and runs the ETL pipeline automatically.
+
+If you want to force a fresh synthetic dataset, delete `data/synthetic_finance.db` from the repo and redeploy.
+
 ## Project Structure
 
 ```
@@ -111,8 +123,6 @@ This project was an exercise in balancing learning with leveraging AI tools effe
 - Effective prompting requires domain knowledge to catch errors (e.g., income figures that seemed too high revealed a categorization bug)
 - Garbage in, garbage out - referencing official documentation improves AI suggestions significantly
 - The right balance: use AI to handle syntax and boilerplate, focus human effort on architecture and validation
-
-See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ##Next Steps: 
 - Host streamlit app on cloud. 
