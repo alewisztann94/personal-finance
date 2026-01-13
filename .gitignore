@@ -2,6 +2,9 @@
 data/raw/real/
 data/processed/real/
 
+# Temporary claude files
+tmpclaude*
+
 # Database files
 *.db
 
