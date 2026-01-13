@@ -31,8 +31,6 @@ numpy==2.4.1
 packaging==25.0
 pandas==2.3.3
 pillow==12.1.0
-playwright==1.57.0
-playwright-mcp==0.1.0
 plotly==6.5.1
 protobuf==6.33.4
 pyarrow==22.0.0
