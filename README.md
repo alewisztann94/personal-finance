@@ -2,6 +2,9 @@
 
 A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://personal-finance-kwhzcygnynwvnsizti5rkx.streamlit.app/)
+
 See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ## Features
@@ -70,9 +73,6 @@ To deploy on Streamlit Community Cloud:
 1. Switch to the deployment branch: `git checkout streamlit-cloud`
 2. Push it to GitHub: `git push -u origin streamlit-cloud`
 3. Create a new Streamlit app pointing at `app.py` on the `streamlit-cloud` branch
-
-Demo app (deployed from `streamlit-cloud`):
-https://personal-finance-kwhzcygnynwvnsizti5rkx.streamlit.app/
 
 Main changes in `streamlit-cloud`:
 - Writes data/DBs to a writable runtime directory instead of the repo
