@@ -7,6 +7,10 @@ import pandas as pd
 from pathlib import Path
 import glob
 import sys
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 def load_and_process_bank_a(data_dir="synthetic"):
     """
@@ -17,8 +21,9 @@ def load_and_process_bank_a(data_dir="synthetic"):
     """
     try:
         # Define file paths based on data_dir
-        input_pattern = f"data/raw/{data_dir}/Bank_A*.csv"
-        output_file = Path(f"data/processed/{data_dir}/bank_a_clean.csv")
+        data_root = get_data_root()
+        input_pattern = str(data_root / "raw" / data_dir / "Bank_A*.csv")
+        output_file = data_root / "processed" / data_dir / "bank_a_clean.csv"
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -133,7 +138,7 @@ def load_and_process_bank_a(data_dir="synthetic"):
 
     except FileNotFoundError:
         print(f"Error: Input files not found.")
-        print(f"Please ensure Bank_A CSV files exist in data/raw/{data_dir}/")
+        print(f"Please ensure Bank_A CSV files exist in {get_data_root() / 'raw' / data_dir}/")
         return None
 
     except pd.errors.ParserError as e:

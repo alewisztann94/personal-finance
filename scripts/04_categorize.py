@@ -6,6 +6,10 @@ Applies category rules to combined transaction data from all banks
 import pandas as pd
 from pathlib import Path
 import sys
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 def categorize_transactions(data_dir="synthetic"):
     """
@@ -16,9 +20,10 @@ def categorize_transactions(data_dir="synthetic"):
     """
     try:
         # Define file paths based on data_dir
-        input_file = Path(f"data/processed/{data_dir}/all_transactions_clean.csv")
-        rules_file = Path("data/category_rules.csv")
-        output_file = Path(f"data/processed/{data_dir}/all_transactions_categorized.csv")
+        data_root = get_data_root()
+        input_file = data_root / "processed" / data_dir / "all_transactions_clean.csv"
+        rules_file = data_root / "category_rules.csv"
+        output_file = data_root / "processed" / data_dir / "all_transactions_categorized.csv"
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)

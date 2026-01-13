@@ -6,6 +6,10 @@ Combines cleaned Bank_A and Bank_B transaction data into a single dataset
 import pandas as pd
 from pathlib import Path
 import sys
+import os
+
+def get_data_root():
+    return Path(os.environ.get("PF_DATA_ROOT", "data"))
 
 def combine_transactions(data_dir="synthetic"):
     """
@@ -16,9 +20,10 @@ def combine_transactions(data_dir="synthetic"):
     """
     try:
         # Define file paths based on data_dir
-        bank_a_file = Path(f"data/processed/{data_dir}/bank_a_clean.csv")
-        bank_b_file = Path(f"data/processed/{data_dir}/bank_b_clean.csv")
-        output_file = Path(f"data/processed/{data_dir}/all_transactions_clean.csv")
+        data_root = get_data_root()
+        bank_a_file = data_root / "processed" / data_dir / "bank_a_clean.csv"
+        bank_b_file = data_root / "processed" / data_dir / "bank_b_clean.csv"
+        output_file = data_root / "processed" / data_dir / "all_transactions_clean.csv"
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
