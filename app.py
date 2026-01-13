@@ -92,6 +92,20 @@ if not db_file.exists():
     st.info("Run the pipeline first: `python scripts/run_pipeline.py`")
     st.stop()
 
+with st.sidebar.expander("Debug status"):
+    st.write(f"Data root: `{DATA_ROOT}`")
+    st.write(f"DB file: `{db_file}`")
+    st.write(f"DB exists: `{db_file.exists()}`")
+    rules_file = DATA_ROOT / "category_rules.csv"
+    st.write(f"Rules file: `{rules_file}`")
+    st.write(f"Rules exists: `{rules_file.exists()}`")
+    if data_dir == "synthetic":
+        raw_dir = DATA_ROOT / "raw" / "synthetic"
+        st.write(f"Raw dir: `{raw_dir}`")
+        st.write(f"Raw dir exists: `{raw_dir.exists()}`")
+        st.write(f"Bank_A exists: `{(raw_dir / 'Bank_A.csv').exists()}`")
+        st.write(f"Bank_B exists: `{(raw_dir / 'Bank_B.csv').exists()}`")
+
 # Get database connection
 conn = sqlite3.connect(db_file)
 
