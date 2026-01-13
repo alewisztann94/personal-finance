@@ -131,5 +131,3 @@ This project was an exercise in balancing learning with leveraging AI tools effe
 - Garbage in, garbage out - referencing official documentation improves AI suggestions significantly
 - The right balance: use AI to handle syntax and boilerplate, focus human effort on architecture and validation
 
-##Next Steps: 
-- Host streamlit app on cloud. 
