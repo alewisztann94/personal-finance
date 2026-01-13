@@ -60,6 +60,25 @@ uv run streamlit run app.py
 
 **Note:** If you're using different banks, you'll need to adapt the load scripts (`01_load_bank_a.py`, `02_load_bank_b.py`) to match your bank's CSV format and column structure.
 
+## Streamlit Cloud Deployment (streamlit-cloud branch)
+
+Keep the branches separate:
+- `main` = local development (real + synthetic data, writes to `data/` in repo, clean scripts)
+- `streamlit-cloud` = deployment only (synthetic-only, platform-specific workarounds, extra UI/logging)
+
+To deploy on Streamlit Community Cloud:
+1. Switch to the deployment branch: `git checkout streamlit-cloud`
+2. Push it to GitHub: `git push -u origin streamlit-cloud`
+3. Create a new Streamlit app pointing at `app.py` on the `streamlit-cloud` branch
+
+Demo app (deployed from `streamlit-cloud`):
+https://personal-finance-kwhzcygnynwvnsizti5rkx.streamlit.app/
+
+Main changes in `streamlit-cloud`:
+- Writes data/DBs to a writable runtime directory instead of the repo
+- Auto-generates synthetic data + runs the pipeline on first run
+- Debug status + pipeline log panels in the sidebar for troubleshooting
+
 ## Project Structure
 
 ```
