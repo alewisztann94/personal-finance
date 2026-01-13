@@ -80,18 +80,9 @@ data_dir = st.sidebar.selectbox(
     ["synthetic", "real"],
     help="Select which dataset to analyze"
 )
-
-# Ensure synthetic data exists on first run (for Streamlit Cloud)
-if data_dir == "synthetic":
-    ensure_synthetic_db()
-
-# Check if database exists
 db_file = DATA_ROOT / f"{data_dir}_finance.db"
-if not db_file.exists():
-    st.error(f"Database not found: {db_file}")
-    st.info("Run the pipeline first: `python scripts/run_pipeline.py`")
-    st.stop()
 
+# Debug status (show before any early stop)
 with st.sidebar.expander("Debug status"):
     st.write(f"Data root: `{DATA_ROOT}`")
     st.write(f"DB file: `{db_file}`")
@@ -105,6 +96,27 @@ with st.sidebar.expander("Debug status"):
         st.write(f"Raw dir exists: `{raw_dir.exists()}`")
         st.write(f"Bank_A exists: `{(raw_dir / 'Bank_A.csv').exists()}`")
         st.write(f"Bank_B exists: `{(raw_dir / 'Bank_B.csv').exists()}`")
+
+# Ensure synthetic data exists on first run (for Streamlit Cloud)
+if data_dir == "synthetic":
+    if st.sidebar.button("Generate synthetic DB"):
+        try:
+            ensure_synthetic_db()
+            st.sidebar.success("Synthetic DB generated.")
+            st.rerun()
+        except Exception as e:
+            st.sidebar.error(f"Generation failed: {e}")
+    else:
+        try:
+            ensure_synthetic_db()
+        except Exception as e:
+            st.sidebar.error(f"Auto-generation failed: {e}")
+
+# Check if database exists
+if not db_file.exists():
+    st.error(f"Database not found: {db_file}")
+    st.info("Run the pipeline first: `python scripts/run_pipeline.py`")
+    st.stop()
 
 # Get database connection
 conn = sqlite3.connect(db_file)
