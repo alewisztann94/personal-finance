@@ -22,17 +22,25 @@ def load_and_process_bank_b(data_dir="synthetic"):
     try:
         # Define file paths based on data_dir
         data_root = get_data_root()
-        input_pattern = str(data_root / "raw" / data_dir / "bank_b*.csv")
+        input_patterns = [
+            str(data_root / "raw" / data_dir / "Bank_B*.csv"),
+            str(data_root / "raw" / data_dir / "bank_b*.csv"),
+        ]
         output_file = data_root / "processed" / data_dir / "bank_b_clean.csv"
 
         # Create output directory if it doesn't exist
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Find all Bank_B CSV files
-        bank_b_files = glob.glob(input_pattern)
+        bank_b_files = []
+        for pattern in input_patterns:
+            bank_b_files.extend(glob.glob(pattern))
+        bank_b_files = sorted(set(bank_b_files))
 
         if not bank_b_files:
-            print(f"Error: No CSV files found matching pattern '{input_pattern}'")
+            print("Error: No CSV files found matching patterns:")
+            for pattern in input_patterns:
+                print(f"  - {pattern}")
             return None
 
         print(f"Processing {data_dir.upper()} data")
