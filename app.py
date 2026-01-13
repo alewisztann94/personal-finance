@@ -11,6 +11,9 @@ from pathlib import Path
 import sqlite3
 import os
 import shutil
+import io
+import contextlib
+import traceback
 
 # Import analysis module (using importlib to handle numeric prefix in filename)
 import importlib.util
@@ -50,21 +53,28 @@ if DATA_ROOT != REPO_DATA_DIR:
     if source_rules.exists() and not dest_rules.exists():
         shutil.copyfile(source_rules, dest_rules)
 
-@st.cache_resource
-def ensure_synthetic_db():
+def run_synthetic_pipeline():
     db_file = DATA_ROOT / "synthetic_finance.db"
     if db_file.exists():
-        return
+        return True, "Database already exists."
 
     raw_dir = DATA_ROOT / "raw" / "synthetic"
     raw_dir.mkdir(parents=True, exist_ok=True)
     bank_a = raw_dir / "Bank_A.csv"
     bank_b = raw_dir / "Bank_B.csv"
 
-    if not bank_a.exists() or not bank_b.exists():
-        synthetic_gen.main()
+    log_buf = io.StringIO()
+    success = False
+    try:
+        with contextlib.redirect_stdout(log_buf), contextlib.redirect_stderr(log_buf):
+            if not bank_a.exists() or not bank_b.exists():
+                synthetic_gen.main()
+            success = pipeline.run_pipeline("synthetic")
+    except Exception:
+        traceback.print_exc(file=log_buf)
 
-    pipeline.run_pipeline("synthetic")
+    log = log_buf.getvalue()
+    return success and db_file.exists(), log
 
 # Page config
 st.set_page_config(
@@ -97,20 +107,26 @@ with st.sidebar.expander("Debug status"):
         st.write(f"Bank_A exists: `{(raw_dir / 'Bank_A.csv').exists()}`")
         st.write(f"Bank_B exists: `{(raw_dir / 'Bank_B.csv').exists()}`")
 
+with st.sidebar.expander("Pipeline log"):
+    st.write(st.session_state.get("pipeline_log", "No log yet."))
+
 # Ensure synthetic data exists on first run (for Streamlit Cloud)
 if data_dir == "synthetic":
     if st.sidebar.button("Generate synthetic DB"):
-        try:
-            ensure_synthetic_db()
+        ok, log = run_synthetic_pipeline()
+        st.session_state["pipeline_log"] = log
+        if ok:
             st.sidebar.success("Synthetic DB generated.")
             st.rerun()
-        except Exception as e:
-            st.sidebar.error(f"Generation failed: {e}")
+        else:
+            st.sidebar.error("Generation failed. See pipeline log.")
     else:
-        try:
-            ensure_synthetic_db()
-        except Exception as e:
-            st.sidebar.error(f"Auto-generation failed: {e}")
+        if "auto_pipeline_attempted" not in st.session_state:
+            ok, log = run_synthetic_pipeline()
+            st.session_state["pipeline_log"] = log
+            st.session_state["auto_pipeline_attempted"] = True
+            if not ok:
+                st.sidebar.error("Auto-generation failed. See pipeline log.")
 
 # Check if database exists
 if not db_file.exists():
