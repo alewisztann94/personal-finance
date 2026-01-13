@@ -2,7 +2,7 @@
 
 A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
-See NOTES.md for my detailed learning notes and thought process throughout this project.
+See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ## Features
 
@@ -111,8 +111,6 @@ This project was an exercise in balancing learning with leveraging AI tools effe
 - Effective prompting requires domain knowledge to catch errors (e.g., income figures that seemed too high revealed a categorization bug)
 - Garbage in, garbage out - referencing official documentation improves AI suggestions significantly
 - The right balance: use AI to handle syntax and boilerplate, focus human effort on architecture and validation
-
-See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ##Next Steps: 
 - Host streamlit app on cloud. 
