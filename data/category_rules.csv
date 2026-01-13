@@ -15,19 +15,39 @@ KMART,Retail
 TARGET,Retail
 BIG W,Retail
 OFFICEWORKS,Office Supplies
+BULK NUTRIENTS,Fitness
+STRAVA,Fitness
+ADIDAS,Fitness
+CLIMBING,Fitness
+SURF,Fitness
+GYM,Fitness
+NEEDESSENTIALS,Fitness
+MARATHON,Fitness
+SOPYC,Fitness
+RUNNING,Fitness
+FITNESS,Fitness
+SELFWEALTH,Investments
+APPLE.COM/AU,Electronics
+APPLE ONLINE,Electronics
 JB HI-FI,Electronics
 HARVEY NORMAN,Electronics
 CHEMIST,Health & Pharmacy
 PHARMACY,Health & Pharmacy
 MEDICAL,Health & Pharmacy
 DOCTOR,Health & Pharmacy
+HT,Health & Pharmacy
+SPECSAVERS,Health & Pharmacy
+INTEGRITY,Health & Pharmacy
+SUNMOS,Health & Pharmacy
 FUEL,Transport
 PETROL,Transport
 BP,Transport
+UNITED,Transport
 CALTEX,Transport
 SHELL,Transport
 UBER,Transport
 TAXI,Transport
+TRANSPORT,Transport
 EASYPARK,Transport
 PARKING,Transport
 REDDY,Transport
@@ -38,6 +58,12 @@ CAFE,Dining Out
 MCDONALD,Dining Out
 KFC,Dining Out
 HUNGRY JACK,Dining Out
+UME GLOBAL,Dining Out
+ZLR,Dining Out
+DUONG HOLDINGS,Dining Out
+CHERRY,Dining Out
+DELISIO,Dining Out
+MUMUCC,Dining Out
 PIZZA,Dining Out
 SUBWAY,Dining Out
 GIANT COFFEE,Dining Out
@@ -49,13 +75,36 @@ PRESOTEA,Dining Out
 KEBAB,Dining Out
 COFFEE,Dining Out
 PHO,Dining Out
+NOBU,Dining Out
 MONSTERA THAI,Dining Out
 VARSITY NORTHBRIDGE,Dining Out
 GUZMAN Y GOMEZ,Dining Out
 HANOZE PARK PTY LTD,Dining Out
 SUBI FISH N CHIPS,Dining Out
-GYM,Fitness
-FITNESS,Fitness
+KANPAI,Dining Out
+GIBNEY,Dining Out
+MUMMUCC,Dining Out
+LOUDER,Dining Out
+QINWE,Dining Out
+POPO,Dining Out
+SEON,Dining Out
+SZECHUAN,Dining Out
+SUSHI,Dining Out
+KHMER,Dining Out
+HOP,Dining Out
+POCHA,Dining Out
+BHATTI,Dining Out
+LET'S EAT,Dining Out
+1988,Dining Out
+RESTAURAN,Dining Out
+BILLY'S,Dining Out
+VIETNAMESE,Dining Out
+JAGEX,Entertainment
+RESIDENCE,Entertainment
+RIOT,Entertainment
+FLORIST,Entertainment
+WISE,Entertainment
+MURRAY,Entertainment
 NETFLIX,Entertainment
 SPOTIFY,Entertainment
 STAN,Entertainment
@@ -66,6 +115,9 @@ READING CINEMAS,Entertainment
 ELECTRICITY,Utilities
 WATER,Utilities
 GAS,Utilities
+DEPARTMENT,Utilities
+HONMAZ,Utilities
+ANNUAL FEE,Utilities
 INTERNET,Utilities
 TELSTRA,Utilities
 OPTUS,Utilities

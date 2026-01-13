@@ -1,8 +1,64 @@
 # Personal Finance Tracker
 
-A Python pipeline to track and categorize personal spending across multiple bank accounts.
+A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
-See [NOTES.md](NOTES.md) for my detailed learning notes and thought process throughout this project.
+See NOTES.md for my detailed learning notes and thought process throughout this project.
+
+## Features
+
+- **Multi-bank ETL pipeline** - Load and normalize transaction data from multiple bank CSV formats
+- **Automated categorization** - Pattern-matching rules engine for transaction classification
+- **SQLite storage** - Structured data storage with optimized queries for analysis
+- **Interactive dashboard** - Streamlit app with spending breakdowns, trends, and merchant insights
+- **Privacy-first design** - Real data stays local; synthetic data generator for demos
+
+## Screenshots
+
+![Dashboard Overview](screenshots/01_overview.png)
+
+![Income vs Expenses](screenshots/02_bar_charts.png)
+
+![Category Breakdown](screenshots/03_categories.png)
+
+![Spending Distribution](screenshots/04_pie.png)
+
+![Top Merchants](screenshots/05_merchants.png)
+
+![Category Summary](screenshots/06_summary.png)
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Data Processing | Python, pandas |
+| Database | SQLite |
+| Dashboard | Streamlit, Plotly |
+| Dependency Management | UV |
+
+## Setup Instructions
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/personal-finance.git
+cd personal-finance
+
+# Install UV (if not already installed)
+pip install uv
+
+# Install dependencies
+uv sync
+
+# Generate synthetic data for demo
+uv run python scripts/generate_synthetic_data.py
+
+# Run the ETL pipeline
+uv run python scripts/run_pipeline.py synthetic
+
+# Launch the dashboard
+uv run streamlit run app.py
+```
+
+**Note:** If you're using different banks, you'll need to adapt the load scripts (`01_load_bank_a.py`, `02_load_bank_b.py`) to match your bank's CSV format and column structure.
 
 ## Project Structure
 
@@ -10,67 +66,53 @@ See [NOTES.md](NOTES.md) for my detailed learning notes and thought process thro
 personal-finance/
 ├── data/
 │   ├── raw/
-│   │   ├── real/              # Actual bank data (gitignored)
-│   │   └── synthetic/         # Generated fake data for demo
+│   │   ├── real/              # Your bank CSVs (gitignored)
+│   │   └── synthetic/         # Generated demo data
 │   ├── processed/
 │   │   ├── real/              # Processed real data (gitignored)
 │   │   └── synthetic/         # Processed synthetic data
-│   └── category_rules.csv     # Pattern matching rules for categorization
+│   └── category_rules.csv     # Pattern matching rules
 ├── scripts/
-│   ├── 01_load_bank_a.py      # Load and clean Bank A transactions
-│   ├── 02_load_bank_b.py      # Load and clean Bank B transactions
-│   ├── 03_combine.py          # Combine data from all banks
-│   ├── 04_categorize.py       # Categorize transactions using rules
-│   ├── 05_load_to_db.py       # Load to SQLite database
-│   ├── generate_synthetic_data.py  # Generate fake data for testing
-│   └── run_pipeline.py        # Orchestrate full pipeline
-└── .gitignore                 # Excludes real financial data
+│   ├── 01_load_bank_a.py      # Load and normalize Bank A data
+│   ├── 02_load_bank_b.py      # Load and normalize Bank B data
+│   ├── 03_combine.py          # Merge all bank data
+│   ├── 04_categorize.py       # Apply category rules
+│   ├── 05_load_to_db.py       # Load to SQLite
+│   ├── 06_analyze.py          # SQL analysis queries
+│   ├── generate_synthetic_data.py
+│   └── run_pipeline.py        # Pipeline orchestrator
+├── screenshots/               # Dashboard screenshots
+├── app.py                     # Streamlit dashboard
+└── pyproject.toml             # UV project config
 ```
 
-## Quick Start
+## Data Privacy
 
-```bash
-# Generate synthetic data (or place your real bank CSVs in data/raw/real/)
-python scripts/generate_synthetic_data.py
+- All real financial data is excluded via `.gitignore`
+- Synthetic data generator creates realistic fake transactions for demos
+- Safe to push to public repositories
 
-# Run the full pipeline
-python scripts/run_pipeline.py           # Uses synthetic data by default
-python scripts/run_pipeline.py real      # Process real data
-```
+## Key Learnings
 
-## Pipeline Steps
+This project was an exercise in balancing learning with leveraging AI tools effectively. Some key takeaways:
 
-| Step | Script | Description |
-|------|--------|-------------|
-| 1 | `01_load_bank_a.py` | Load Bank A CSV, parse dates, normalize descriptions |
-| 2 | `02_load_bank_b.py` | Load Bank B CSV, combine debit/credit columns |
-| 3 | `03_combine.py` | Merge both banks into single dataset |
-| 4 | `04_categorize.py` | Apply category rules via pattern matching |
-| 5 | `05_load_to_db.py` | Load to SQLite for SQL analysis |
+**Technical:**
+- Pandas for data cleaning and transformation across different CSV formats
+- SQLite for structured storage and SQL-based analysis
+- Python module patterns (`if __name__ == "__main__"`) for pipeline orchestration
+- Streamlit for rapid dashboard prototyping
 
-## Technical Approach
+**Process:**
+- Pattern matching order matters - more specific rules (like transfers) need precedence over general ones (like transport)
+- Always validate synthetic data generators - they can inadvertently include real info
+- UV simplifies Python dependency management, especially in AI-assisted workflows
 
-**Data Loading & Cleaning:**
-- Python scripts load raw CSVs from multiple bank accounts
-- Each bank has different CSV formats - scripts normalize to common schema
-- Dates parsed to datetime, amounts to float, descriptions uppercased
+**AI-Assisted Development:**
+- Effective prompting requires domain knowledge to catch errors (e.g., income figures that seemed too high revealed a categorization bug)
+- Garbage in, garbage out - referencing official documentation improves AI suggestions significantly
+- The right balance: use AI to handle syntax and boilerplate, focus human effort on architecture and validation
 
-**Categorization:**
-- Pattern matching against `category_rules.csv`
-- First match wins - order matters (transfers before transport to catch "IB BPAY" before "BP")
-- Uncategorized expenses flagged for review
+See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
-**Privacy:**
-- Real financial data is gitignored
-- Synthetic data generator creates realistic fake transactions
-- Safe to push to public GitHub
-
-## What I Learned
-
-- Pandas for data cleaning and transformation
-- SQLite for data storage
-- Python module imports and `if __name__ == "__main__"` pattern
-- Pipeline orchestration using `importlib`
-- Git workflow - .gitignore for sensitive data
-- Trade-offs between manual work vs. AI-assisted development
-
+##Next Steps: 
+- Host streamlit app on cloud. 
