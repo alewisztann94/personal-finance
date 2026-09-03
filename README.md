@@ -2,6 +2,9 @@
 
 A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://personal-finance-kwhzcygnynwvnsizti5rkx.streamlit.app/)
+
 See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
 ## Features
@@ -39,7 +42,7 @@ See [NOTES.md](NOTES.md) for detailed learning notes and thought process through
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/personal-finance.git
+git clone https://github.com/alewisztann94/personal-finance.git
 cd personal-finance
 
 # Install UV (if not already installed)
@@ -60,17 +63,25 @@ uv run streamlit run app.py
 
 **Note:** If you're using different banks, you'll need to adapt the load scripts (`01_load_bank_a.py`, `02_load_bank_b.py`) to match your bank's CSV format and column structure.
 
-## Streamlit Community Cloud Deployment (Synthetic Data)
+## Streamlit Cloud Deployment (streamlit-cloud branch)
 
-This repo is set up to generate synthetic data and build the SQLite database automatically on first run.
+Keep the branches separate:
+- `main` = local development (real + synthetic data, writes to `data/` in repo, clean scripts)
+- `streamlit-cloud` = deployment only (synthetic-only, platform-specific workarounds, extra UI/logging)
 
+To deploy on Streamlit Community Cloud:
 1. Push this repository to GitHub (public or private).
 2. In Streamlit Community Cloud, click "New app".
-3. Select your repo/branch and set the main file to `app.py`.
-4. The app will build using `requirements.txt` and `runtime.txt`.
-5. On first launch, the app creates synthetic data and runs the ETL pipeline automatically.
+3. Select your repo and the `streamlit-cloud` branch, then set the main file to `app.py`.
+4. The app builds using `requirements.txt` and `runtime.txt`.
+5. On first launch it generates synthetic data and runs the ETL pipeline automatically.
 
-If you want to force a fresh synthetic dataset, delete `data/synthetic_finance.db` from the repo and redeploy.
+To force a fresh synthetic dataset, delete `data/synthetic_finance.db` and redeploy.
+
+Main changes in `streamlit-cloud`:
+- Writes data/DBs to a writable runtime directory instead of the repo
+- Auto-generates synthetic data + runs the pipeline on first run
+- Debug status + pipeline log panels in the sidebar for troubleshooting
 
 ## Project Structure
 
@@ -100,9 +111,30 @@ personal-finance/
 
 ## Data Privacy
 
-- All real financial data is excluded via `.gitignore`
-- Synthetic data generator creates realistic fake transactions for demos
-- Safe to push to public repositories
+Real bank exports must never enter git history. Two layers enforce this:
+
+1. **`.gitignore` denies by default** - every `.csv`/`.xlsx`/`.ofx`/`.qif`/`.pdf` under
+   `data/` is ignored, with an explicit allowlist for `data/**/synthetic/` and
+   `data/category_rules.csv`. Do not loosen this into a path-prefix blocklist -
+   prefix rules silently miss generated output paths such as `data/processed/*.csv`.
+2. **A pre-commit hook** rejects any staged file containing a Luhn-valid card
+   number or a BSB/account pair.
+
+Enable the hook after cloning (hooks are not carried by `git clone`):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Verify it is active before your first commit:
+
+```bash
+git config core.hooksPath   # -> .githooks
+```
+
+Note that deleting a file does not remove it from git history; the blob stays
+reachable in every earlier commit. Prevention at commit time is the only cheap
+fix - after the fact it requires a history rewrite.
 
 ## Key Learnings
 
@@ -124,5 +156,3 @@ This project was an exercise in balancing learning with leveraging AI tools effe
 - Garbage in, garbage out - referencing official documentation improves AI suggestions significantly
 - The right balance: use AI to handle syntax and boilerplate, focus human effort on architecture and validation
 
-##Next Steps: 
-- Host streamlit app on cloud. 
