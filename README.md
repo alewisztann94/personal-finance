@@ -107,9 +107,30 @@ personal-finance/
 
 ## Data Privacy
 
-- All real financial data is excluded via `.gitignore`
-- Synthetic data generator creates realistic fake transactions for demos
-- Safe to push to public repositories
+Real bank exports must never enter git history. Two layers enforce this:
+
+1. **`.gitignore` denies by default** - every `.csv`/`.xlsx`/`.ofx`/`.qif`/`.pdf` under
+   `data/` is ignored, with an explicit allowlist for `data/**/synthetic/` and
+   `data/category_rules.csv`. Do not loosen this into a path-prefix blocklist -
+   prefix rules silently miss generated output paths such as `data/processed/*.csv`.
+2. **A pre-commit hook** rejects any staged file containing a Luhn-valid card
+   number or a BSB/account pair.
+
+Enable the hook after cloning (hooks are not carried by `git clone`):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Verify it is active before your first commit:
+
+```bash
+git config core.hooksPath   # -> .githooks
+```
+
+Note that deleting a file does not remove it from git history; the blob stays
+reachable in every earlier commit. Prevention at commit time is the only cheap
+fix - after the fact it requires a history rewrite.
 
 ## Key Learnings
 

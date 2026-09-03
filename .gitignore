@@ -1,4 +1,24 @@
-# Real financial data (private)
+# ---------------------------------------------------------------
+# Financial data: DENY BY DEFAULT.
+# Everything under data/ is ignored unless explicitly allowed below.
+# Deliberate: a path-prefix blocklist silently misses generated output
+# paths, so do not loosen this. Only synthetic data belongs in git.
+# ---------------------------------------------------------------
+data/**/*.csv
+data/**/*.xlsx
+data/**/*.xls
+data/**/*.ofx
+data/**/*.qif
+data/**/*.pdf
+
+# Explicit allowlist: synthetic demo data + non-sensitive config only
+!data/category_rules.csv
+!data/raw/synthetic/
+!data/raw/synthetic/*.csv
+!data/processed/synthetic/
+!data/processed/synthetic/*.csv
+
+# Belt-and-braces: never track a 'real' directory
 data/raw/real/
 data/processed/real/
 

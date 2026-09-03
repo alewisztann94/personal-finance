@@ -1,0 +1,4 @@
+#!/bin/sh
+# Block commits containing Luhn-valid card numbers or AU BSB/account pairs.
+# Installed via: git config core.hooksPath .githooks
+exec python "$(git rev-parse --show-toplevel)/.githooks/scan_secrets.py"
