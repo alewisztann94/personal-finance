@@ -42,7 +42,7 @@ See [NOTES.md](NOTES.md) for detailed learning notes and thought process through
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/personal-finance.git
+git clone https://github.com/alewisztann94/personal-finance.git
 cd personal-finance
 
 # Install UV (if not already installed)
