@@ -33,9 +33,10 @@ __pycache__/
 *.pyc
 *.pyo
 
-# IDE
+# IDE / local tool state
 .vscode/
 .idea/
+.claude/settings.local.json
 
 # OS files
 .DS_Store
