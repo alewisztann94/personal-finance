@@ -3,7 +3,7 @@
 A Python-based ETL pipeline for tracking and categorizing personal spending across multiple bank accounts, with an interactive Streamlit dashboard for visualization and analysis.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://personal-finance-edrh4awtgn6gcyvja8ayuq.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://personal-finance-ygkaqmswhakhgqdcf4ebtg.streamlit.app/)
 
 See [NOTES.md](NOTES.md) for detailed learning notes and thought process throughout this project.
 
